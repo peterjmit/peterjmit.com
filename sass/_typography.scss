@@ -1,0 +1,43 @@
+@import "compass/typography/vertical_rhythm";
+
+$base-font-size: 16px;
+$base-line-height: 24px;
+$default-rhythm-border-style: solid;
+$relative-font-sizing: true;
+$round-to-nearest-half-line: false;
+$min-line-padding: 2px;
+
+@include establish-baseline;
+
+body {
+    font-family: $font-body;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: $font-title;
+}
+
+h1, .h1 {
+    margin: 0 auto rhythm(1, 42px);
+}
+
+h2, .h2 {
+    margin: 0 auto rhythm(1, 32px);
+}
+
+h3, .h3 {
+    margin: 0 auto rhythm(1, 24px);
+}
+
+h4, .h4 {
+    margin: 0 auto rhythm(1, 18px);
+}
+
+h5, .h5 {
+    margin: 0 auto rhythm(1, 16px);
+}
+
+h6, .h6 {
+    margin: 0 auto rhythm(1, 12px);
+}
+

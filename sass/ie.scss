@@ -1,5 +1,7 @@
-/* Welcome to Compass. Use this file to write IE specific override styles.
- * Import this file using the following HTML or equivalent:
- * <!--[if IE]>
- *   <link href="/stylesheets/ie.css" media="screen, projection" rel="stylesheet" type="text/css" />
- * <![endif]--> */
+// $legacy-support-for-ie6: true;
+// $legacy-support-for-ie7: true;
+// $legacy-support-for-ie8: true;
+// $legacy-support-for-mozilla: true;
+
+// @import "normalize";
+// @import "_variables";
