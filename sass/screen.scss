@@ -4,6 +4,45 @@
 @import "_variables";
 @import "_typography";
 @import "_layout";
+@import "_icons";
+@import "_social";
 
 // Helpers
-@import "helpers";
+@import "_helpers";
+
+.hero {
+  background-color: $background-colour;
+  h1 {
+    font-size: 2.5em;
+  }
+}
+
+.services.units .unit {
+  width: 33.33%;
+}
+
+.hero {
+  text-align: center;
+}
+
+.hero .hire {
+  margin: 0 auto;
+  margin-bottom: -4.45em;
+}
+
+.hero .social {
+  width: 23em;
+  padding: 3em 0;
+  margin: 0 auto;
+  text-transform:uppercase;
+  li {
+    text-indent: -999em;
+  }
+}
+
+.hero em,
+.services em {
+  font-style: normal;
+  color: $emphasis-primary-colour;
+}
+

@@ -1,0 +1,55 @@
+body {
+}
+
+.block {
+  margin: 0 auto;
+  padding: 0 5%;
+  max-width: 71.25em
+}
+
+.hero {
+  padding: 3em 0;
+}
+
+.content {
+  padding: 5em 0;
+}
+
+.units {
+  @extend .cf;
+  margin:0 -$grid-gutter;
+}
+
+.unit {
+  box-sizing: border-box;
+  display: block;
+  float: left;
+  padding: 0 $grid-gutter;
+  width: 100%;
+}
+
+#top {
+  position: relative;
+  padding: 1em 0;
+}
+
+#nav {
+  position: absolute;
+  // width: 100%;
+  right: 2em;
+  top: 3em;
+  // left: 0;
+}
+
+#logo {
+  position: relative;
+  span {
+    position: absolute;
+    width: 200px;
+    // display: block;
+    padding-top: 1.75em;
+    left: 6em;
+    // top: 0.5em;
+  }
+}
+

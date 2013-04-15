@@ -1,0 +1,24 @@
+.social ul {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.social li {
+  margin: 0 1.3em;
+  display: inline-block;
+  background-image: image-url('icons-big.svg');
+  background-position: 0 0;
+  width: 35px;
+  height: 35px;
+}
+
+.social .github {}
+
+.social .stackoverflow {
+    background-position:35px 0;
+}
+
+.social .twitter {
+    background-position:70px 0;
+}

@@ -363,7 +363,7 @@ table {
 /* line 64, ../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/_vertical_rhythm.scss */
 html {
   font-size: 16px;
-  line-height: 1.5em;
+  line-height: 2em;
 }
 
 /* line 12, ../sass/_typography.scss */
@@ -378,32 +378,126 @@ h1, h2, h3, h4, h5, h6 {
 
 /* line 20, ../sass/_typography.scss */
 h1, .h1 {
-  margin: 0 auto 0.57143em;
+  margin: 0 auto 0.7619em;
 }
 
 /* line 24, ../sass/_typography.scss */
 h2, .h2 {
-  margin: 0 auto 0.75em;
+  margin: 0 auto 1em;
 }
 
 /* line 28, ../sass/_typography.scss */
 h3, .h3 {
-  margin: 0 auto 1em;
+  margin: 0 auto 1.33333em;
 }
 
 /* line 32, ../sass/_typography.scss */
 h4, .h4 {
-  margin: 0 auto 1.33333em;
+  margin: 0 auto 1.77778em;
 }
 
 /* line 36, ../sass/_typography.scss */
 h5, .h5 {
-  margin: 0 auto 1.5em;
+  margin: 0 auto 2em;
 }
 
 /* line 40, ../sass/_typography.scss */
 h6, .h6 {
-  margin: 0 auto 2em;
+  margin: 0 auto 2.66667em;
+}
+
+/* line 4, ../sass/_layout.scss */
+.block {
+  margin: 0 auto;
+  padding: 0 5%;
+  max-width: 71.25em;
+}
+
+/* line 10, ../sass/_layout.scss */
+.hero {
+  padding: 3em 0;
+}
+
+/* line 14, ../sass/_layout.scss */
+.content {
+  padding: 5em 0;
+}
+
+/* line 18, ../sass/_layout.scss */
+.units {
+  margin: -1.5em;
+}
+
+/* line 23, ../sass/_layout.scss */
+.unit {
+  box-sizing: border-box;
+  display: block;
+  float: left;
+  padding: 0 1.5em;
+  width: 100%;
+}
+
+/* line 31, ../sass/_layout.scss */
+#top {
+  position: relative;
+  padding: 1em 0;
+}
+
+/* line 36, ../sass/_layout.scss */
+#nav {
+  position: absolute;
+  right: 2em;
+  top: 3em;
+}
+
+/* line 44, ../sass/_layout.scss */
+#logo {
+  position: relative;
+}
+/* line 46, ../sass/_layout.scss */
+#logo span {
+  position: absolute;
+  width: 200px;
+  padding-top: 1.75em;
+  left: 6em;
+}
+
+/* line 1, ../sass/_icons.scss */
+.hire {
+  color: #fff;
+  padding-top: 0.5em;
+  text-align: center;
+  width: 23em;
+  height: 2.35em;
+  display: block;
+  background-image: url('/img/arrow.svg?1361984775');
+}
+
+/* line 1, ../sass/_social.scss */
+.social ul {
+  list-style: none;
+  margin: 0 auto;
+  padding: 0;
+}
+
+/* line 7, ../sass/_social.scss */
+.social li {
+  margin: 0 1.3em;
+  display: inline-block;
+  background-image: url('/img/icons-big.svg?1361983734');
+  background-position: 0 0;
+  width: 35px;
+  height: 35px;
+}
+
+/* line 18, ../sass/_social.scss */
+.social .stackoverflow {
+  background-position: 35px 0;
+}
+
+/* line 22, ../sass/_social.scss */
+.social .twitter {
+  background-position: 70px 0;
 }
 
 /* ==========================================================================
@@ -494,25 +588,62 @@ h6, .h6 {
  * 2. The use of `table` rather than `block` is only necessary if using
  *    `:before` to contain the top-margins of child elements.
  */
-/* line 90, ../sass/_helpers.scss */
-.cf:before,
-.cf:after {
+/* line 88, ../sass/_helpers.scss */
+.cf, .units {
+  *zoom: 1;
+}
+/* line 91, ../sass/_helpers.scss */
+.cf:before, .units:before, .cf:after, .units:after {
   content: " ";
   /* 1 */
   display: table;
   /* 2 */
 }
-
-/* line 95, ../sass/_helpers.scss */
-.cf:after {
+/* line 96, ../sass/_helpers.scss */
+.cf:after, .units:after {
   clear: both;
 }
 
-/*
- * For IE 6/7 only
- * Include this rule to trigger hasLayout and contain floats.
- */
-/* line 104, ../sass/_helpers.scss */
-.cf {
-  *zoom: 1;
+/* line 13, ../sass/screen.scss */
+.hero {
+  background-color: #f2f2f2;
+}
+/* line 15, ../sass/screen.scss */
+.hero h1 {
+  font-size: 2.5em;
+}
+
+/* line 20, ../sass/screen.scss */
+.services.units .unit {
+  width: 33.33%;
+}
+
+/* line 24, ../sass/screen.scss */
+.hero {
+  text-align: center;
+}
+
+/* line 28, ../sass/screen.scss */
+.hero .hire {
+  margin: 0 auto;
+  margin-bottom: -4.45em;
+}
+
+/* line 33, ../sass/screen.scss */
+.hero .social {
+  width: 23em;
+  padding: 3em 0;
+  margin: 0 auto;
+  text-transform: uppercase;
+}
+/* line 38, ../sass/screen.scss */
+.hero .social li {
+  text-indent: -999em;
+}
+
+/* line 44, ../sass/screen.scss */
+.hero em,
+.services em {
+  font-style: normal;
+  color: #5191d0;
 }
