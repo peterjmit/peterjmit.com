@@ -357,13 +357,13 @@ table {
 
 /* line 61, ../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/_vertical_rhythm.scss */
 * html {
-  font-size: 100%;
+  font-size: 112.5%;
 }
 
 /* line 64, ../../../../../Library/Ruby/Gems/1.8/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/typography/_vertical_rhythm.scss */
 html {
-  font-size: 16px;
-  line-height: 2em;
+  font-size: 18px;
+  line-height: 1.77778em;
 }
 
 /* line 12, ../sass/_typography.scss */
@@ -383,7 +383,7 @@ h1, .h1 {
 
 /* line 24, ../sass/_typography.scss */
 h2, .h2 {
-  margin: 0 auto 1em;
+  margin: 0 auto 0.84211em;
 }
 
 /* line 28, ../sass/_typography.scss */
@@ -406,6 +406,39 @@ h6, .h6 {
   margin: 0 auto 2.66667em;
 }
 
+/* line 44, ../sass/_typography.scss */
+a:link {
+  color: #5191d0;
+}
+
+/* line 48, ../sass/_typography.scss */
+a:hover {
+  color: #d97c34;
+}
+
+/* line 52, ../sass/_typography.scss */
+a:visited {
+  color: #1d446b;
+}
+
+/* line 57, ../sass/_typography.scss */
+a:focus,
+a:active {
+  color: #b86422;
+}
+
+/* line 61, ../sass/_typography.scss */
+#logo {
+  color: black;
+  text-transform: uppercase;
+}
+
+/* line 66, ../sass/_typography.scss */
+nav a {
+  text-decoration: none;
+  padding: 0 1em;
+}
+
 /* line 4, ../sass/_layout.scss */
 .block {
   margin: 0 auto;
@@ -420,7 +453,7 @@ h6, .h6 {
 
 /* line 14, ../sass/_layout.scss */
 .content {
-  padding: 5em 0;
+  padding: 7em 0;
 }
 
 /* line 18, ../sass/_layout.scss */
@@ -447,18 +480,18 @@ h6, .h6 {
 #nav {
   position: absolute;
   right: 2em;
-  top: 3em;
+  top: 2.4em;
 }
 
-/* line 44, ../sass/_layout.scss */
+/* line 42, ../sass/_layout.scss */
 #logo {
   position: relative;
 }
-/* line 46, ../sass/_layout.scss */
+/* line 44, ../sass/_layout.scss */
 #logo span {
   position: absolute;
   width: 200px;
-  padding-top: 1.75em;
+  padding-top: 1.4em;
   left: 6em;
 }
 
@@ -467,8 +500,8 @@ h6, .h6 {
   color: #fff;
   padding-top: 0.5em;
   text-align: center;
-  width: 23em;
-  height: 2.35em;
+  width: 368px;
+  height: 38px;
   display: block;
   background-image: url('/img/arrow.svg?1361984775');
 }
@@ -626,13 +659,13 @@ h6, .h6 {
 /* line 28, ../sass/screen.scss */
 .hero .hire {
   margin: 0 auto;
-  margin-bottom: -4.45em;
+  margin-bottom: -4.35em;
 }
 
 /* line 33, ../sass/screen.scss */
 .hero .social {
   width: 23em;
-  padding: 3em 0;
+  padding: 2em 0 4em 0;
   margin: 0 auto;
   text-transform: uppercase;
 }
