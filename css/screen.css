@@ -369,71 +369,104 @@ html {
 /* line 12, ../sass/_typography.scss */
 body {
   font-family: "Varela Round", sans-serif;
+  color: #333333;
 }
 
-/* line 16, ../sass/_typography.scss */
+/* line 17, ../sass/_typography.scss */
 h1, h2, h3, h4, h5, h6 {
   font-family: "Bitter", serif;
 }
 
-/* line 20, ../sass/_typography.scss */
+/* line 21, ../sass/_typography.scss */
 h1, .h1 {
   margin: 0 auto 0.7619em;
 }
 
-/* line 24, ../sass/_typography.scss */
+/* line 25, ../sass/_typography.scss */
 h2, .h2 {
   margin: 0 auto 0.84211em;
 }
 
-/* line 28, ../sass/_typography.scss */
+/* line 29, ../sass/_typography.scss */
 h3, .h3 {
   margin: 0 auto 1.33333em;
 }
 
-/* line 32, ../sass/_typography.scss */
+/* line 33, ../sass/_typography.scss */
 h4, .h4 {
   margin: 0 auto 1.77778em;
 }
 
-/* line 36, ../sass/_typography.scss */
+/* line 37, ../sass/_typography.scss */
 h5, .h5 {
   margin: 0 auto 2em;
 }
 
-/* line 40, ../sass/_typography.scss */
+/* line 41, ../sass/_typography.scss */
 h6, .h6 {
   margin: 0 auto 2.66667em;
 }
 
-/* line 44, ../sass/_typography.scss */
+/* line 46, ../sass/_typography.scss */
 a:link {
   color: #5191d0;
 }
 
-/* line 48, ../sass/_typography.scss */
-a:hover {
+/* line 51, ../sass/_typography.scss */
+a:hover,
+abbr:hover {
   color: #d97c34;
 }
 
-/* line 52, ../sass/_typography.scss */
+/* line 55, ../sass/_typography.scss */
 a:visited {
   color: #1d446b;
 }
 
-/* line 57, ../sass/_typography.scss */
+/* line 60, ../sass/_typography.scss */
 a:focus,
 a:active {
   color: #b86422;
 }
 
-/* line 61, ../sass/_typography.scss */
+/* line 65, ../sass/_typography.scss */
+.muted {
+  color: #999999;
+}
+
+/* line 70, ../sass/_typography.scss */
+.muted a, .muted a:visited {
+  color: #999999;
+}
+/* line 76, ../sass/_typography.scss */
+.muted a:hover,
+.muted a:focus,
+.muted a:active {
+  color: #666666;
+}
+
+/* line 81, ../sass/_typography.scss */
+a.more:after {
+  content: "\2192";
+}
+
+/* line 85, ../sass/_typography.scss */
+.copyright:before {
+  content: "\00a9";
+}
+
+/* line 89, ../sass/_typography.scss */
+abbr:hover {
+  cursor: help;
+}
+
+/* line 93, ../sass/_typography.scss */
 #logo {
   color: black;
   text-transform: uppercase;
 }
 
-/* line 66, ../sass/_typography.scss */
+/* line 98, ../sass/_typography.scss */
 nav a {
   text-decoration: none;
   padding: 0 1em;
@@ -448,12 +481,12 @@ nav a {
 
 /* line 10, ../sass/_layout.scss */
 .hero {
-  padding: 3em 0;
+  padding: 6em 0;
 }
 
 /* line 14, ../sass/_layout.scss */
 .content {
-  padding: 7em 0;
+  padding: 6em 0;
 }
 
 /* line 18, ../sass/_layout.scss */
@@ -484,10 +517,15 @@ nav a {
 }
 
 /* line 42, ../sass/_layout.scss */
+#footer {
+  padding: 3em 0;
+}
+
+/* line 46, ../sass/_layout.scss */
 #logo {
   position: relative;
 }
-/* line 44, ../sass/_layout.scss */
+/* line 48, ../sass/_layout.scss */
 #logo span {
   position: absolute;
   width: 200px;
@@ -500,21 +538,21 @@ nav a {
   color: #fff;
   padding-top: 0.5em;
   text-align: center;
-  width: 368px;
+  width: 365px;
   height: 38px;
   display: block;
   background-image: url('/img/arrow.svg?1361984775');
 }
 
 /* line 1, ../sass/_social.scss */
-.social ul {
+.social-icons {
   list-style: none;
   margin: 0 auto;
   padding: 0;
 }
 
 /* line 7, ../sass/_social.scss */
-.social li {
+.social-icons li {
   margin: 0 1.3em;
   display: inline-block;
   background-image: url('/img/icons-big.svg?1361983734');
@@ -523,13 +561,13 @@ nav a {
   height: 35px;
 }
 
-/* line 18, ../sass/_social.scss */
-.social .stackoverflow {
+/* line 19, ../sass/_social.scss */
+.social-icons .stackoverflow {
   background-position: 35px 0;
 }
 
-/* line 22, ../sass/_social.scss */
-.social .twitter {
+/* line 23, ../sass/_social.scss */
+.social-icons .twitter {
   background-position: 70px 0;
 }
 
@@ -639,44 +677,38 @@ nav a {
 
 /* line 13, ../sass/screen.scss */
 .hero {
+  text-align: center;
   background-color: #f2f2f2;
 }
-/* line 15, ../sass/screen.scss */
+/* line 17, ../sass/screen.scss */
 .hero h1 {
   font-size: 2.5em;
 }
-
-/* line 20, ../sass/screen.scss */
-.services.units .unit {
-  width: 33.33%;
-}
-
-/* line 24, ../sass/screen.scss */
-.hero {
-  text-align: center;
-}
-
-/* line 28, ../sass/screen.scss */
+/* line 21, ../sass/screen.scss */
 .hero .hire {
   margin: 0 auto;
-  margin-bottom: -4.35em;
+  margin-bottom: -7.35em;
 }
-
-/* line 33, ../sass/screen.scss */
+/* line 26, ../sass/screen.scss */
 .hero .social {
   width: 23em;
   padding: 2em 0 4em 0;
   margin: 0 auto;
   text-transform: uppercase;
 }
-/* line 38, ../sass/screen.scss */
+/* line 31, ../sass/screen.scss */
 .hero .social li {
   text-indent: -999em;
 }
 
-/* line 44, ../sass/screen.scss */
+/* line 38, ../sass/screen.scss */
 .hero em,
 .services em {
   font-style: normal;
   color: #5191d0;
+}
+
+/* line 43, ../sass/screen.scss */
+#services.units .unit {
+  width: 33.33%;
 }

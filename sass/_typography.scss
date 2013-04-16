@@ -11,6 +11,7 @@ $min-line-padding: 2px;
 
 body {
     font-family: $font-body;
+    color: $font-colour;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -41,11 +42,13 @@ h6, .h6 {
     margin: 0 auto rhythm(1, 12px);
 }
 
+// Interactive styles
 a:link {
   color: $emphasis-primary-colour;
 }
 
-a:hover {
+a:hover,
+abbr:hover {
   color: $emphasis-secondary-colour;
 }
 
@@ -56,6 +59,35 @@ a:visited {
 a:focus,
 a:active {
   color: darken($emphasis-secondary-colour, 10%);
+}
+
+// helper classes
+.muted {
+  color: $font-muted-colour;
+}
+
+.muted {
+  a, a:visited {
+    color: $font-muted-colour;
+  }
+
+  a:hover,
+  a:focus,
+  a:active {
+    color: darken($font-muted-colour, 20%);
+  }
+}
+
+a.more:after {
+  content: $right-arrow;
+}
+
+.copyright:before {
+  content: $copyright;
+}
+
+abbr:hover {
+  cursor: help;
 }
 
 #logo {

@@ -1,11 +1,12 @@
-.social ul {
+.social-icons {
   list-style: none;
   margin: 0 auto;
   padding: 0;
 }
 
-.social li {
+.social-icons li {
   margin: 0 1.3em;
+  // padding-left: 35px;
   display: inline-block;
   background-image: image-url('icons-big.svg');
   background-position: 0 0;
@@ -13,12 +14,12 @@
   height: 35px;
 }
 
-.social .github {}
+.social-icons .github {}
 
-.social .stackoverflow {
+.social-icons .stackoverflow {
     background-position:35px 0;
 }
 
-.social .twitter {
+.social-icons .twitter {
     background-position:70px 0;
 }
