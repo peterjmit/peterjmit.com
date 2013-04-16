@@ -1,5 +1,5 @@
 WebFontConfig = {
-  google: { families: [ 'Bitter:400,400italic', 'Varela Round' ] }
+  google: { families: [ 'Bitter:400,400italic', 'Varela Round', 'Satisfy' ] }
 };
 (function() {
   var wf = document.createElement('script');

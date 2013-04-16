@@ -11,11 +11,12 @@ $min-line-padding: 2px;
 
 body {
     font-family: $font-body;
-    color: $font-colour;
+    color: $body-font-colour;
 }
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: $font-title;
+  font-weight: normal;
+  font-family: $font-title;
 }
 
 h1, .h1 {
@@ -63,18 +64,18 @@ a:active {
 
 // helper classes
 .muted {
-  color: $font-muted-colour;
+  color: $muted-font-colour;
 }
 
 .muted {
   a, a:visited {
-    color: $font-muted-colour;
+    color: $muted-font-colour;
   }
 
   a:hover,
   a:focus,
   a:active {
-    color: darken($font-muted-colour, 20%);
+    color: darken($muted-font-colour, 20%);
   }
 }
 
@@ -90,9 +91,12 @@ abbr:hover {
   cursor: help;
 }
 
-#logo {
-  color: $black;
+#top {
   text-transform: uppercase;
+}
+
+#logo a {
+  color: $body-font-colour;
 }
 
 nav a {
