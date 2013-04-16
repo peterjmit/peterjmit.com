@@ -9,15 +9,15 @@ module.exports = ->
   @initConfig
     watch:
       sass:
-          files: 'sass/*.scss'
+          files: 'web/sass/*.scss'
           tasks: ['compass']
 
       css:
-        files: 'css/*.css'
+        files: 'web/css/*.css'
         tasks: ['livereload']
 
       html:
-          files: 'index.html'
+          files: 'web/index.html'
           tasks: ['livereload']
 
     livereload:
@@ -27,17 +27,17 @@ module.exports = ->
       livereload:
         options:
           port: 9001,
-          middleware: (connect, options) -> [lrSnippet, folderMount connect, '.']
+          middleware: (connect, options) -> [lrSnippet, folderMount connect, 'web']
 
     compass:
       main:
         options:
           require: 'compass-normalize'
-          cssDir: 'css'
-          sassDir: 'sass'
-          imagesDir: 'img'
-          javascriptsDir: 'js'
-          raw: 'http_path = "/"\n'
+          cssDir: 'web/css'
+          sassDir: 'web/sass'
+          imagesDir: 'web/img'
+          javascriptsDir: 'web/js'
+          raw: 'http_path = "/"\n relative_assets = true\n'
 
 
 
