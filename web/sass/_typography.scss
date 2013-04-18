@@ -79,6 +79,10 @@ a:active {
   }
 }
 
+::selection {
+  background: lighten($emphasis-secondary-colour, 30%);
+}
+
 a.more:after {
   content: $right-arrow;
 }

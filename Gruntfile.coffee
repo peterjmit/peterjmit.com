@@ -37,6 +37,7 @@ module.exports = ->
           sassDir: 'web/sass'
           imagesDir: 'web/img'
           javascriptsDir: 'web/js'
+          outputStyle: 'compressed'
           raw: 'http_path = "/"\n relative_assets = true\n'
 
 

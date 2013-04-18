@@ -4,20 +4,21 @@
 }
 
 .hero h1 {
-  font-size: 2.5em;
+  font-size: 3.5em;
+}
+
+.hero p {
+  font-size: 1.2em;
 }
 
 .hero .hire {
   margin: 0 auto;
-  margin-bottom: -5.55em;
+  margin-bottom: -5.6em;
 }
 
 .hero .social {
   width: 23em;
-  padding: 2em 0 4em 0;
+  padding: 1.5em 0 3em 0;
   margin: 0 auto;
   text-transform:uppercase;
-  li {
-    text-indent: -999em;
-  }
 }
