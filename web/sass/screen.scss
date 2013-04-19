@@ -19,6 +19,15 @@
   color: $emphasis-primary-colour;
 }
 
-#services.units .unit {
-  width: 33.33%;
+@media screen and (min-width: 45.0625em) {
+  #main .content .unit {
+    width: 50%;
+  }
+}
+
+@media screen and (min-width: 60.0625em) {
+  #main .content .unit {
+    width: 33.33333%;
+    margin-bottom: 0;
+  }
 }

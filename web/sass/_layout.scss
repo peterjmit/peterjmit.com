@@ -19,5 +19,18 @@
   float: left;
   padding: 0 $grid-gutter;
   width: 100%;
+  margin-bottom: 1em;
 }
 
+@media screen and (min-width: 45.0625em) {
+  #main .content .unit {
+    width: 50%;
+  }
+}
+
+@media screen and (min-width: 60.0625em) {
+  #main .content .unit {
+    width: 33.33333%;
+    margin-bottom: 0;
+  }
+}
