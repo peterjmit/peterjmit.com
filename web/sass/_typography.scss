@@ -1,5 +1,8 @@
 @import "compass/typography/vertical_rhythm";
 
+// -----------------------------------------------------------------------------
+// Rhythm
+// -----------------------------------------------------------------------------
 $base-font-size: 18px;
 $base-line-height: 32px;
 $default-rhythm-border-style: solid;
@@ -14,6 +17,9 @@ body {
     color: $body-font-colour;
 }
 
+// -----------------------------------------------------------------------------
+// Header styles
+// -----------------------------------------------------------------------------
 h1, h2, h3, h4, h5, h6 {
   font-weight: normal;
   font-family: $font-title;
@@ -43,7 +49,9 @@ h6, .h6 {
     margin: 0 auto rhythm(1, 12px);
 }
 
-// Interactive styles
+// -----------------------------------------------------------------------------
+// Link styles
+// -----------------------------------------------------------------------------
 a:link {
   color: $emphasis-primary-colour;
 }
@@ -62,7 +70,9 @@ a:active {
   color: darken($emphasis-secondary-colour, 10%);
 }
 
-// helper classes
+// -----------------------------------------------------------------------------
+// Typographic flair
+// -----------------------------------------------------------------------------
 .muted {
   color: $muted-font-colour;
 }
@@ -95,16 +105,8 @@ abbr:hover {
   cursor: help;
 }
 
-#top {
-  text-transform: uppercase;
-}
-
-#logo a {
-  color: $body-font-colour;
-}
-
-nav a {
-  text-decoration: none;
-  padding: 0 1em;
+em.highlight {
+  font-style: normal;
+  color: $emphasis-primary-colour;
 }
 
