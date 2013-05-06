@@ -7,18 +7,31 @@ module.exports = ->
 
   # Initialize the configuration.
   @initConfig
+    markdown:
+      blog:
+        template: 'markdown/blog/index.html.jst'
+        files: ['markdown/blog/*.md']
+        dest: 'web/blog/'
+        options:
+            gfm: true
+            highlight: 'manual'
+
     watch:
+      markdown:
+        files: ['markdown/**/*.md', 'markdown/**/*.jst']
+        tasks: ['markdown']
+
       sass:
-          files: 'web/sass/*.scss'
-          tasks: ['compass']
+        files: 'web/sass/*.scss'
+        tasks: ['compass']
 
       css:
         files: 'web/css/*.css'
         tasks: ['livereload']
 
       html:
-          files: 'web/index.html'
-          tasks: ['livereload']
+        files: 'web/**/*.html'
+        tasks: ['livereload']
 
     livereload:
       port: 35729
@@ -48,6 +61,7 @@ module.exports = ->
   @loadNpmTasks 'grunt-regarde'
   @loadNpmTasks 'grunt-contrib-connect'
   @loadNpmTasks 'grunt-contrib-livereload'
+  @loadNpmTasks 'grunt-markdown'
 
   @renameTask 'regarde', 'watch'
 
