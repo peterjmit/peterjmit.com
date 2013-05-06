@@ -70,7 +70,7 @@ some of the updates and differences to PhpSpec + Mockery.</p>
 or editing the following dependency in <code>composer.json</code></p>
 <pre><code class="lang-json">&quot;phpspec/phpspec&quot;: &quot;2.0.*@dev&quot;</code></pre>
 <h2>Changes that will <em>break</em> your spec files</h2>
-<p>At first glance not much has changed hit the following command and it appears
+<p>At first glance not much has changed, hit the following command and it appears
 to be business as usual. But if you are trying to run an <em>old</em> test suite
 then nothing will work.</p>
 <pre><code class="lang-bash">$ ./vendor/bin/phpspec desc HelloWorld</code></pre>
@@ -80,7 +80,7 @@ changes.</p>
 <p>The namespace <code>PHPSpec2</code> has changed to <code>PhpSpec</code></p>
 <p>For example many of your specs will will extend <code>PHPSpec2\ObjectBehavior</code>,
 so you will want to update your use statement to <code>use PhpSpec\ObjectBehavior;</code></p>
-<h3>Specs now have the suffix &quot;Spec&quot;</h3>
+<h3>Spec files/classes now have the suffix &quot;Spec&quot;</h3>
 <p>If you are upgrading existing specs, you will need to rename your spec for <code>HelloWorld.php</code>
 to <code>HelloWorldSpec.php</code>.</p>
 <h3>The ANY_ARGUMENT(S) constant has gone</h3>

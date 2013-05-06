@@ -37,7 +37,7 @@ or editing the following dependency in `composer.json`
 ```
 
 ## Changes that will _break_ your spec files
-At first glance not much has changed hit the following command and it appears
+At first glance not much has changed, hit the following command and it appears
 to be business as usual. But if you are trying to run an _old_ test suite
 then nothing will work.
 
@@ -55,7 +55,7 @@ The namespace `PHPSpec2` has changed to `PhpSpec`
 For example many of your specs will will extend `PHPSpec2\ObjectBehavior`,
 so you will want to update your use statement to `use PhpSpec\ObjectBehavior;`
 
-### Specs now have the suffix "Spec"
+### Spec files/classes now have the suffix "Spec"
 
 If you are upgrading existing specs, you will need to rename your spec for `HelloWorld.php`
 to `HelloWorldSpec.php`.
