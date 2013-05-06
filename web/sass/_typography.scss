@@ -57,11 +57,6 @@ a:link {
   color: $emphasis-primary-colour;
 }
 
-a:hover,
-abbr:hover {
-  color: $emphasis-secondary-colour;
-}
-
 a:visited {
   color: darken($emphasis-primary-colour, 30%)
 }
@@ -69,6 +64,11 @@ a:visited {
 a:focus,
 a:active {
   color: darken($emphasis-secondary-colour, 10%);
+}
+
+a:hover,
+abbr:hover {
+  color: $emphasis-secondary-colour;
 }
 
 // -----------------------------------------------------------------------------
