@@ -98,7 +98,7 @@ This is a useful change, for example:
 
 <h3 id="stub-methods">PhpSpec will force you to stub methods that you previously could ignore</h3>
 
-In Mockery, if you called a method that has not been explictly stubbed it would
+In Mockery, if you call a method that has not been explictly stubbed it would
 return an instance of `Mockery\Undefined`. This is problematic, because if you
 use loose comparisons, your test suite may behave unexpectedly. If you consider
 the following block of code that was added in [this commit][5]
@@ -120,13 +120,13 @@ In the spec, we stub `$person->isFemale()` and `$person->getName()`
 
 ```php
 // test name shortened for brevity
-function it_should_address/*..*/($person)
+function it_should_address_/*..*/($person)
 {
     $person->getName()->willReturn('Jane');
     $person->isFemale()->willReturn(true);
 
     $this->addressSomeoneWithSalutation($person)
-        ->shouldReturn('Hello Ms Jane');
+        ->shouldReturn('Dear Ms. Jane');
 }
 ```
 
@@ -136,16 +136,16 @@ to `$person->isMale()` will always evaluate to true (because the object `Mockery
 is returned and coerced to `true`), incorrectly giving us the salutation for a male.
 
 Prophecy on the other hand will not put up with this, failing the test with a
-useful message
+useful message.
 
 ![Method not stubbed](https://raw.github.com/peterjmit/phpspec-prophecy-example/master/screenshots/method-not-stubbed.png)
 
-This is easily resolved as shown in [this commit][6].
+We are therefore forced to stub `$person->isMale()` in order for our tests to pass
+ as shown in [this commit][6].
 
 If you have found this post useful, or if you have any comments, additions &
 corrections then let me know [on twitter](https://twitter.com/peterjmit) or
 <a href="mailto:pete@peterjmit.com?subject=Re: Why should you upgrade your test suite to PhpSpec & Prophecy">email me</a>
-
 
 
 [1]: https://github.com/peterjmit/phpspec-prophecy-example "PhpSpec & Prophecy example repo"

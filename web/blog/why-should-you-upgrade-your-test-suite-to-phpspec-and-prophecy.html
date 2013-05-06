@@ -107,7 +107,7 @@ however Prophecy will complain:</p>
 </ol>
 <h3 id="stub-methods">PhpSpec will force you to stub methods that you previously could ignore</h3>
 
-<p>In Mockery, if you called a method that has not been explictly stubbed it would
+<p>In Mockery, if you call a method that has not been explictly stubbed it would
 return an instance of <code>Mockery\Undefined</code>. This is problematic, because if you
 use loose comparisons, your test suite may behave unexpectedly. If you consider
 the following block of code that was added in <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/d03dd5aae4dfb4611ff04c4f35664cfd67d82704" title="Example of calling a method that hasn&#39;t been stubbed">this commit</a></p>
@@ -123,22 +123,23 @@ the following block of code that was added in <a href="https://github.com/peterj
 <span class="comment">// ...</span></code></pre>
 <p>In the spec, we stub <code>$person-&gt;isFemale()</code> and <code>$person-&gt;getName()</code></p>
 <pre><code class="lang-php"><span class="comment">// test name shortened for brevity</span>
-<span class="function"><span class="keyword">function</span> <span class="title">it_should_address</span>/*..*/<span class="params">(<span class="variable">$person</span>)</span>
+<span class="function"><span class="keyword">function</span> <span class="title">it_should_address_</span>/*..*/<span class="params">(<span class="variable">$person</span>)</span>
 {</span>
     <span class="variable">$person</span>-&gt;getName()-&gt;willReturn(<span class="string">'Jane'</span>);
     <span class="variable">$person</span>-&gt;isFemale()-&gt;willReturn(<span class="keyword">true</span>);
 
     <span class="variable">$this</span>-&gt;addressSomeoneWithSalutation(<span class="variable">$person</span>)
-        -&gt;shouldReturn(<span class="string">'Hello Ms Jane'</span>);
+        -&gt;shouldReturn(<span class="string">'Dear Ms. Jane'</span>);
 }</code></pre>
 <p>If you haven&#39;t realised yet with Mockery this spec will always fail, but not in
 an expected way (or a way that would occur in an actual runtime). The call
 to <code>$person-&gt;isMale()</code> will always evaluate to true (because the object <code>Mockery\Undefined</code>
 is returned and coerced to <code>true</code>), incorrectly giving us the salutation for a male.</p>
 <p>Prophecy on the other hand will not put up with this, failing the test with a
-useful message</p>
+useful message.</p>
 <p><img src="https://raw.github.com/peterjmit/phpspec-prophecy-example/master/screenshots/method-not-stubbed.png" alt="Method not stubbed"></p>
-<p>This is easily resolved as shown in <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/1038519d8985dd095d92cb87d35e605caa728a13" title="Commit resolving un-stubbed method issue">this commit</a>.</p>
+<p>We are therefore forced to stub <code>$person-&gt;isMale()</code> in order for our tests to pass
+ as shown in <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/1038519d8985dd095d92cb87d35e605caa728a13" title="Commit resolving un-stubbed method issue">this commit</a>.</p>
 <p>If you have found this post useful, or if you have any comments, additions &amp;
 corrections then let me know <a href="https://twitter.com/peterjmit">on twitter</a> or
 <a href="mailto:pete@peterjmit.com?subject=Re: Why should you upgrade your test suite to PhpSpec & Prophecy">email me</a></p>
