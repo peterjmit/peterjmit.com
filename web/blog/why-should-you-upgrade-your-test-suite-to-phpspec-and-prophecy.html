@@ -46,7 +46,7 @@
 <p>PhpSpec has recently dropped a 2.0 beta, and it has moved from the mock object
 framework &quot;Mockery&quot; in favour of a new framework called
 <a href="https://github.com/phpspec/prophecy">Prophecy</a>.</p>
-<h4>The short guide to upgrading your test suite</h4>
+<h4>The tl;dr guide to upgrading your test suite</h4>
 <ol>
 <li>Add <code>&quot;phpspec/phpspec&quot;: &quot;2.0.*@dev&quot;</code> to <code>composer.json</code></li>
 <li>Change all instances of the <code>PHPSpec2</code> namespace to <code>PhpSpec</code></li>
@@ -64,7 +64,7 @@ due to the way Prophecy works</p>
 <p>Documentation is a bit sparse on the ground (<a href="https://github.com/phpspec/phpspec">contribute</a>)
 so hopefully I can give you a couple of pointers for upgrading your test suite.</p>
 <p>I have created an <a href="https://github.com/peterjmit/phpspec-prophecy-example" title="PhpSpec &amp; Prophecy example repo">example repository</a> to try and give a quick guide through
-some of the updates and differences to PhpSpec + Mockery.</p>
+some of the updates and differences between PhpSpec/Mockery &amp; PhpSpec/Prophecy.</p>
 <h2>First step &ndash; update/install PhpSpec with Prophecy</h2>
 <p>I am assuming you are using composer you can get a fresh copy of PhpSpec by adding
 or editing the following dependency in <code>composer.json</code></p>
@@ -91,9 +91,9 @@ look at our initial spec again you will see that <code>phpspec desc</code> gener
 with a use statement for <code>Prophecy\Argument</code>.</p>
 <p>If you want a direct replacement for <code>ANY_ARGUMENT</code> then you should use</p>
 <pre><code class="lang-php"><span class="variable">$mockObject</span>-&gt;methodStub(Prophecy\Argument::any());</code></pre>
-<h2>PhpSpec is stricter (changes that will cause your tests to fail)</h2>
-<p>Prophecy integration contains two key features that give me a lot more confidence
-in my specs.</p>
+<h2>Changes that can make your specs <em>better</em></h2>
+<p>Prophecy integration with PhpSpec contains two key features that give me a lot
+more confidence in my specs and they may cause your existing test suite to fail.</p>
 <h3 id="undefined-methods">PhpSpec complains about un-defined methods in collaborators</h3>
 
 <p>If you take a look at <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/08d5ba9098afd090f56632a45429047e9843e7c8" title="Commit with undefined method on collaborator">this commit</a> I have tried to specify that <code>HelloWorld</code>
@@ -140,8 +140,8 @@ useful message.</p>
 <p><img src="https://raw.github.com/peterjmit/phpspec-prophecy-example/master/screenshots/method-not-stubbed.png" alt="Method not stubbed"></p>
 <p>We are therefore forced to stub <code>$person-&gt;isMale()</code> in order for our tests to pass
  as shown in <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/1038519d8985dd095d92cb87d35e605caa728a13" title="Commit resolving un-stubbed method issue">this commit</a>.</p>
-<p>If you have found this post useful, or if you have any comments, additions &amp;
-corrections then let me know <a href="https://twitter.com/peterjmit">on twitter</a> or
+<p>If you have a comment on this post, or if I have missed any of the standout
+new features then let me know <a href="https://twitter.com/peterjmit">on twitter</a> or
 <a href="mailto:pete@peterjmit.com?subject=Re: Why should you upgrade your test suite to PhpSpec & Prophecy">email me</a></p>
 
       </article>

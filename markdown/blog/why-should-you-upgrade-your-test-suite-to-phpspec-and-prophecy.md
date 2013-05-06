@@ -7,7 +7,7 @@ PhpSpec has recently dropped a 2.0 beta, and it has moved from the mock object
 framework "Mockery" in favour of a new framework called
 [Prophecy](https://github.com/phpspec/prophecy).
 
-#### The short guide to upgrading your test suite
+#### The tl;dr guide to upgrading your test suite
 1. Add `"phpspec/phpspec": "2.0.*@dev"` to `composer.json`
 2. Change all instances of the `PHPSpec2` namespace to `PhpSpec`
 3. Rename all your `spec/<MyClass>` specs to `spec/<MyClass>Spec`
@@ -25,7 +25,7 @@ Documentation is a bit sparse on the ground ([contribute](https://github.com/php
 so hopefully I can give you a couple of pointers for upgrading your test suite.
 
 I have created an [example repository][1] to try and give a quick guide through
-some of the updates and differences to PhpSpec + Mockery.
+some of the updates and differences between PhpSpec/Mockery & PhpSpec/Prophecy.
 
 ## First step &ndash; update/install PhpSpec with Prophecy
 
@@ -78,10 +78,10 @@ If you want a direct replacement for `ANY_ARGUMENT` then you should use
 $mockObject->methodStub(Prophecy\Argument::any());
 ```
 
-## PhpSpec is stricter (changes that will cause your tests to fail)
+## Changes that can make your specs _better_
 
-Prophecy integration contains two key features that give me a lot more confidence
-in my specs.
+Prophecy integration with PhpSpec contains two key features that give me a lot
+more confidence in my specs and they may cause your existing test suite to fail.
 
 <h3 id="undefined-methods">PhpSpec complains about un-defined methods in collaborators</h3>
 
@@ -143,8 +143,8 @@ useful message.
 We are therefore forced to stub `$person->isMale()` in order for our tests to pass
  as shown in [this commit][6].
 
-If you have found this post useful, or if you have any comments, additions &
-corrections then let me know [on twitter](https://twitter.com/peterjmit) or
+If you have a comment on this post, or if I have missed any of the standout
+new features then let me know [on twitter](https://twitter.com/peterjmit) or
 <a href="mailto:pete@peterjmit.com?subject=Re: Why should you upgrade your test suite to PhpSpec & Prophecy">email me</a>
 
 
