@@ -21,32 +21,33 @@ body {
 // Header styles
 // -----------------------------------------------------------------------------
 h1, h2, h3, h4, h5, h6 {
+  line-height: 1.5;
   font-weight: normal;
   font-family: $font-title;
 }
 
 h1, .h1 {
-    margin: 0 auto rhythm(1, 42px);
+  margin: 0 auto rhythm(1, 42px);
 }
 
 h2, .h2 {
-    margin: 0 auto rhythm(1, 38px);
+  margin: 0 auto rhythm(1, 38px);
 }
 
 h3, .h3 {
-    margin: 0 auto rhythm(1, 24px);
+  margin: 0 auto rhythm(1, 24px);
 }
 
 h4, .h4 {
-    margin: 0 auto rhythm(1, 18px);
+  margin: 0 auto rhythm(1, 20px);
 }
 
 h5, .h5 {
-    margin: 0 auto rhythm(1, 16px);
+  margin: 0 auto rhythm(1, 16px);
 }
 
 h6, .h6 {
-    margin: 0 auto rhythm(1, 12px);
+  margin: 0 auto rhythm(1, 12px);
 }
 
 // -----------------------------------------------------------------------------
@@ -108,5 +109,12 @@ abbr:hover {
 .bling {
   font-style: normal;
   color: $emphasis-primary-colour;
+}
+
+p code,
+li code {
+  background-color: $background-colour;
+  padding: 0.1em 0.3em;
+  border-radius:5px;
 }
 
