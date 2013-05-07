@@ -96,7 +96,7 @@ This is a useful change, for example:
   1. If you refactor a method name, but don't update a dependant class - it will be caught by the test suite
   2. If you type hint for an interface, but use methods not defined within that interface your test will fail
 
-<h3 id="stub-methods">PhpSpec will force you to stub methods that you previously could ignore</h3>
+<h3 id="stub-methods">Stubs in PhpSpec/Prophecy are "all or nothing"</h3>
 
 In Mockery, if you call a method that has not been explictly stubbed it would
 return an instance of `Mockery\Undefined`. This is problematic, because if you
@@ -138,6 +138,11 @@ is returned and coerced to `true`), incorrectly giving us the salutation for a m
 Prophecy on the other hand will not put up with this, failing the test with a
 useful message.
 
+[edit] This is because stubs in Prophecy are "loose demand doubles", if you do not stub
+any methods on them, they will always return `null`. Once you stub a method they
+become "strict demand doubles" requiring you to stub all methods that your
+<abbr title="Subject Under Specification">SUS</abbr> is interacting with. <sup>[1](#ref-1)</sup>
+
 ![Method not stubbed](https://raw.github.com/peterjmit/phpspec-prophecy-example/master/screenshots/method-not-stubbed.png)
 
 We are therefore forced to stub `$person->isMale()` in order for our tests to pass
@@ -146,6 +151,8 @@ We are therefore forced to stub `$person->isMale()` in order for our tests to pa
 If you have a comment on this post, or if I have missed any of the standout
 new features then let me know [on twitter](https://twitter.com/peterjmit) or
 <a href="mailto:pete@peterjmit.com?subject=Re: Why should you upgrade your test suite to PhpSpec & Prophecy">email me</a>
+
+<small id="ref-1">\[1\] thanks to [@everzet](https://twitter.com/everzet) & [@_md](https://twitter.com/_md) for providing explanation on twitter</small>
 
 
 [1]: https://github.com/peterjmit/phpspec-prophecy-example "PhpSpec & Prophecy example repo"

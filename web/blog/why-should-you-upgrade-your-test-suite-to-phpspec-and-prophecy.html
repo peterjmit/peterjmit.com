@@ -105,7 +105,7 @@ however Prophecy will complain:</p>
 <li>If you refactor a method name, but don&#39;t update a dependant class - it will be caught by the test suite</li>
 <li>If you type hint for an interface, but use methods not defined within that interface your test will fail</li>
 </ol>
-<h3 id="stub-methods">PhpSpec will force you to stub methods that you previously could ignore</h3>
+<h3 id="stub-methods">Stubs in PhpSpec/Prophecy are &quot;all or nothing&quot;</h3>
 
 <p>In Mockery, if you call a method that has not been explictly stubbed it would
 return an instance of <code>Mockery\Undefined</code>. This is problematic, because if you
@@ -137,12 +137,17 @@ to <code>$person-&gt;isMale()</code> will always evaluate to true (because the o
 is returned and coerced to <code>true</code>), incorrectly giving us the salutation for a male.</p>
 <p>Prophecy on the other hand will not put up with this, failing the test with a
 useful message.</p>
+<p>[edit] This is because stubs in Prophecy are &quot;loose demand doubles&quot;, if you do not stub
+any methods on them, they will always return <code>null</code>. Once you stub a method they
+become &quot;strict demand doubles&quot; requiring you to stub all methods that your
+<abbr title="Subject Under Specification">SUS</abbr> is interacting with. <sup><a href="#ref-1">1</a></sup></p>
 <p><img src="https://raw.github.com/peterjmit/phpspec-prophecy-example/master/screenshots/method-not-stubbed.png" alt="Method not stubbed"></p>
 <p>We are therefore forced to stub <code>$person-&gt;isMale()</code> in order for our tests to pass
  as shown in <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/1038519d8985dd095d92cb87d35e605caa728a13" title="Commit resolving un-stubbed method issue">this commit</a>.</p>
 <p>If you have a comment on this post, or if I have missed any of the standout
 new features then let me know <a href="https://twitter.com/peterjmit">on twitter</a> or
 <a href="mailto:pete@peterjmit.com?subject=Re: Why should you upgrade your test suite to PhpSpec & Prophecy">email me</a></p>
+<p><small id="ref-1">[1] thanks to <a href="https://twitter.com/everzet">@everzet</a> &amp; <a href="https://twitter.com/_md">@_md</a> for providing explanation on twitter</small></p>
 
       </article>
     </div>
