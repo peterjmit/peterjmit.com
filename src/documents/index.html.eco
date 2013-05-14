@@ -1,0 +1,42 @@
+---
+title: Home
+layout: default
+---
+
+<section class="hero">
+  <div class="block">
+    <h1>
+      Hi, my name is <em class="bling">Pete</em>.
+    </h1>
+    <p>
+      I am a <em class="bling">full stack</em> web developer with a <em class="bling">diverse</em> set
+      of skills. I am interested in working with startups & small businesses.
+    </p>
+
+    <div class="social">
+      <p>Follow me on</p>
+
+      <%- @partial('social.html') %>
+    </div>
+
+    <span class="hire">
+      <a href="mailto:pete@peterjmit.com?subject=I would like to work with you on...">I am available for hire</a>
+    </span>
+  </div>
+</section>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<div class="block">
+  <hr>
+  <% for post in @getFilesAtPath("blog").toJSON(): %>
+    <h3><a href="<%= post.url %>"><%= post.title %></a></h3>
+    <br/>
+  <% end %>
+</div>
+
