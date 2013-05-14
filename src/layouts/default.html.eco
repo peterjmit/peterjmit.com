@@ -17,7 +17,6 @@
   <meta name="email" content="<%= @site.email %>">
 
   <link href="/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/tomorrow.min.css">
   <%- @getBlock('styles').toHTML() %>
 
   <link rel="shortcut icon" href="/favicon.ico">
