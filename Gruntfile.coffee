@@ -6,10 +6,10 @@ module.exports = ->
       main:
         options:
           require: 'compass-normalize'
-          cssDir: 'web/css'
+          cssDir: 'out/css'
           sassDir: 'src/sass'
-          imagesDir: 'web/img'
-          javascriptsDir: 'web/js'
+          imagesDir: 'out/img'
+          javascriptsDir: 'out/js'
           outputStyle: 'compressed'
           raw: 'http_path = "/"\n relative_assets = true\n'
 

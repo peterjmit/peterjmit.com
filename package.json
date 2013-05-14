@@ -4,12 +4,13 @@
   "description": "Personal website",
   "main": "index.html",
   "dependencies": {
+    "bal-util": "~2.0.5",
     "docpad-plugin-marked": "~2.1.1",
     "docpad-plugin-livereload": "~2.4.0",
     "docpad-plugin-partials": "~2.6.2",
     "docpad-plugin-eco": "~2.0.2",
+    "docpad-plugin-ghpages": "~2.0.2",
     "moment": "~2.0.0",
-    "bal-util": "~2.0.5",
     "grunt": "~0.4.1",
     "grunt-contrib-compass": "~0.1.3"
   },

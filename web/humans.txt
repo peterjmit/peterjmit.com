@@ -1,9 +1,0 @@
-# humanstxt.org/
-# The humans responsible & technology colophon
-
-# Built by
-
-Peter Mitchell <peterjmit@gmail.com> @peterjmit
-
-# Design by
-Natalie Rauh

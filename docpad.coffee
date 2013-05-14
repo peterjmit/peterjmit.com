@@ -2,7 +2,6 @@ moment = require 'moment'
 
 docpadConfig =
   port: 9001
-  outPath: 'web'
 
   events:
     writeAfter: (opts,next) ->
