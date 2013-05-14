@@ -1,16 +1,21 @@
 .hero {
   padding: 4em 0;
-}
-
-.hero {
   text-align: center;
   background-color: $background-colour;
+}
+
+.hero.small {
+  padding: 3em;
 }
 
 .hero h1 {
   font-size: 3.5em;
   max-width: 12em;
   line-height: 1.2em;
+}
+
+.hero.small h1 {
+  margin-bottom: 0;
 }
 
 .hero p {

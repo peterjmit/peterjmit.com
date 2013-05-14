@@ -1,17 +1,17 @@
 .hire {
   font-family: $font-flair;
   font-size: 1.3em;
-  color: #fff;
+  color: #fff !important;
   padding-top: 0.3em;
   text-align: center;
   width: 365px;
   height: 39px;
   display: block;
   background-image: image-url('arrow.svg');
+  text-decoration: none;
 }
 
 .hire a {
-  text-decoration: none;
   color: #fff;
 }
 

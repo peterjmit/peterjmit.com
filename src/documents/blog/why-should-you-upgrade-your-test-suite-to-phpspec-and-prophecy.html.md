@@ -1,7 +1,9 @@
-<header>
-    <h1>Why should you upgrade your test suite to PhpSpec & Prophecy</h1>
-    <time datetime="2013-05-06">Monday, May 6 2013</time>
-</header>
+---
+title: Why should you upgrade your test suite to PhpSpec & Prophecy
+layout: post
+date: 2013-05-06
+tags: [php, bdd]
+---
 
 PhpSpec has recently dropped a 2.0 beta, and it has moved from the mock object
 framework "Mockery" in favour of a new framework called

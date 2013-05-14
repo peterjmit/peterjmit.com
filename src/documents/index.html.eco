@@ -1,0 +1,37 @@
+---
+isPage: true
+---
+
+<section class="hero">
+  <div class="block">
+    <h1>
+      Hi, my name is <em class="bling">Pete</em>.
+    </h1>
+    <p>
+      I am a <em class="bling">full stack</em> web developer with a <em class="bling">diverse</em> set
+      of skills. I am interested in working with startups & small businesses.
+    </p>
+
+    <div class="social">
+      <p>Follow me on</p>
+
+      <%- @partial('social.html') %>
+    </div>
+
+    <a class="hire" href="mailto:<%= @site.email %>?subject=I would like to work with you on...">
+      I am available for hire
+    </a>
+  </div>
+</section>
+
+<br>
+<br>
+<br>
+<br>
+
+<div class="block">
+  <% for post in @getCollection('posts').toJSON().slice(0, 3): %>
+    <%= @partial('post_snippet.html.eco', @, { post: post }) %>
+  <% end %>
+</div>
+

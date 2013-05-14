@@ -16,6 +16,4 @@ set :user, "pete"
 set :use_sudo, false
 set :keep_releases,  3
 
-set :copy_exclude, ["sass"]
-
 after "deploy:restart", "deploy:cleanup"
