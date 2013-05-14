@@ -3,6 +3,10 @@ moment = require 'moment'
 docpadConfig =
   port: 9001
 
+  templateData:
+    formatDate: (date,format = 'MMM Do, YYYY') ->
+      moment(date).format(format)
+
   events:
     writeAfter: (opts,next) ->
       # Prepare
