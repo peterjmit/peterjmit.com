@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+
+  <link rel="dns-prefetch" href="//fonts.googleapis.com">
+  <link rel="dns-prefetch" href="//www.google-analytics.com">
+  <link rel="dns-prefetch" href="//yandex.st">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Why should you upgrade your test suite to PhpSpec & Prophecy :: Peter Mitchell :: Website and application developer</title>
+  <meta name="description" content="Peter Mitchell helps build online businesses and is interested in working with start-ups, small companies and individuals">
+  <meta name="keywords" content="web development, web applications, web developer, php developer, javascript developer, ecommerce">
+
+  <link href="/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/tomorrow.min.css">
+
+  <link rel="shortcut icon" href="/favicon.ico">
+
+  <script src="/js/fonts.js"></script>
+</head>
+
+<body>
+  <header id="top" role="banner">
+    <div class="block">
+      <a href="/" id="logo">
+        <img src="/img/logo.svg" alt="site logo" title="Peter Mitchell is a web developer">
+        <span>Peter Mitchell</span>
+      </a>
+
+      <nav id="nav" role="navigation">
+          <a href="mailto:pete@peterjmit.com?subject=Hi!">Say hello</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" role="main">
+    <div class="content">
+      <article class="post block">
+        <header>
+    <h1>Why should you upgrade your test suite to PhpSpec &amp; Prophecy</h1>
+    <time datetime="2013-05-06">Monday, May 6 2013</time>
+</header>
+
+<p>PhpSpec has recently dropped a 2.0 beta, and it has moved from the mock object
+framework &quot;Mockery&quot; in favour of a new framework called
+<a href="https://github.com/phpspec/prophecy">Prophecy</a>.</p>
+<h4>The tl;dr guide to upgrading your test suite</h4>
+<ol>
+<li>Add <code>&quot;phpspec/phpspec&quot;: &quot;2.0.*@dev&quot;</code> to <code>composer.json</code></li>
+<li>Change all instances of the <code>PHPSpec2</code> namespace to <code>PhpSpec</code></li>
+<li>Rename all your <code>spec/&lt;MyClass&gt;</code> specs to <code>spec/&lt;MyClass&gt;Spec</code></li>
+<li>Replace the <code>ANY_ARGUMENT</code> constant with <code>Prophecy\Argument::any()</code></li>
+</ol>
+<p>Having done the above, your test suite should run but you may see some new failures
+due to the way Prophecy works</p>
+<ol>
+<li><a href="#undefined-methods">PhpSpec will not let you use methods that are undefined on collaborators</a></li>
+<li><a href="#stub-methods">Any method called during a spec has to be stubbed</a></li>
+</ol>
+<hr>
+
+<p>Documentation is a bit sparse on the ground (<a href="https://github.com/phpspec/phpspec">contribute</a>)
+so hopefully I can give you a couple of pointers for upgrading your test suite.</p>
+<p>I have created an <a href="https://github.com/peterjmit/phpspec-prophecy-example" title="PhpSpec &amp; Prophecy example repo">example repository</a> to try and give a quick guide through
+some of the updates and differences between PhpSpec/Mockery &amp; PhpSpec/Prophecy.</p>
+<h2>First step &ndash; update/install PhpSpec with Prophecy</h2>
+<p>I am assuming you are using composer you can get a fresh copy of PhpSpec by adding
+or editing the following dependency in <code>composer.json</code></p>
+<pre><code class="lang-json">&quot;phpspec/phpspec&quot;: &quot;2.0.*@dev&quot;</code></pre>
+<h2>Changes that will <em>break</em> your spec files</h2>
+<p>At first glance not much has changed, hit the following command and it appears
+to be business as usual. But if you are trying to run an <em>old</em> test suite
+then nothing will work.</p>
+<pre><code class="lang-bash">$ ./vendor/bin/phpspec desc HelloWorld</code></pre>
+<p>Take a look at the <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/f2cfc57dd99b14226a417863785eaf6b660fc651" title="HelloWorld spec description">generated spec</a> and you will notice a couple of
+changes.</p>
+<h3>PhpSpec has a new namespace</h3>
+<p>The namespace <code>PHPSpec2</code> has changed to <code>PhpSpec</code></p>
+<p>For example many of your specs will will extend <code>PHPSpec2\ObjectBehavior</code>,
+so you will want to update your use statement to <code>use PhpSpec\ObjectBehavior;</code></p>
+<h3>Spec files/classes now have the suffix &quot;Spec&quot;</h3>
+<p>If you are upgrading existing specs, you will need to rename your spec for <code>HelloWorld.php</code>
+to <code>HelloWorldSpec.php</code>.</p>
+<h3>The ANY_ARGUMENT(S) constant has gone</h3>
+<p>In some of your mock expectations, you may have used something like</p>
+<pre><code class="lang-php"><span class="variable">$mockObject</span>-&gt;methodStub(ANY_ARGUMENT);</code></pre>
+<p>Prophecy handles <a href="https://github.com/phpspec/prophecy#arguments-wildcarding" title="PhpSpec docs - Arguments Wildcarding">arguments wildcarding</a> slightly differently. If you take a
+look at our initial spec again you will see that <code>phpspec desc</code> generates a spec
+with a use statement for <code>Prophecy\Argument</code>.</p>
+<p>If you want a direct replacement for <code>ANY_ARGUMENT</code> then you should use</p>
+<pre><code class="lang-php"><span class="variable">$mockObject</span>-&gt;methodStub(Prophecy\Argument::any());</code></pre>
+<h2>Changes that can make your specs <em>better</em></h2>
+<p>Prophecy integration with PhpSpec contains two key features that give me a lot
+more confidence in my specs and they may cause your existing test suite to fail.</p>
+<h3 id="undefined-methods">PhpSpec complains about un-defined methods in collaborators</h3>
+
+<p>If you take a look at <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/08d5ba9098afd090f56632a45429047e9843e7c8" title="Commit with undefined method on collaborator">this commit</a> I have tried to specify that <code>HelloWorld</code>
+will say hello to a <code>Person</code>. With previous versions of PhpSpec this would have worked
+however Prophecy will complain:</p>
+<p><img src="https://raw.github.com/peterjmit/phpspec-prophecy-example/master/screenshots/undefined-method.png" alt="Undefined method screenshot"></p>
+<p>This is a useful change, for example:</p>
+<ol>
+<li>If you refactor a method name, but don&#39;t update a dependant class - it will be caught by the test suite</li>
+<li>If you type hint for an interface, but use methods not defined within that interface your test will fail</li>
+</ol>
+<h3 id="stub-methods">Stubs in PhpSpec/Prophecy are &quot;all or nothing&quot;</h3>
+
+<p>In Mockery, if you call a method that has not been explictly stubbed it would
+return an instance of <code>Mockery\Undefined</code>. This is problematic, because if you
+use loose comparisons, your test suite may behave unexpectedly. If you consider
+the following block of code that was added in <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/d03dd5aae4dfb4611ff04c4f35664cfd67d82704" title="Example of calling a method that hasn&#39;t been stubbed">this commit</a></p>
+<pre><code class="lang-javascript"><span class="comment">// ...</span>
+<span class="keyword">if</span> ($person-&gt;isMale()) {
+    $salutation = <span class="string">'Mr. '</span>;
+} <span class="keyword">else</span> <span class="keyword">if</span> ($person-&gt;isFemale()) {
+    $salutation = <span class="string">'Ms. '</span>;
+} <span class="keyword">else</span> {
+    <span class="comment">// gender in-specific salutation</span>
+    $salutation = <span class="string">''</span>;
+}
+<span class="comment">// ...</span></code></pre>
+<p>In the spec, we stub <code>$person-&gt;isFemale()</code> and <code>$person-&gt;getName()</code></p>
+<pre><code class="lang-php"><span class="comment">// test name shortened for brevity</span>
+<span class="function"><span class="keyword">function</span> <span class="title">it_should_address_</span>/*..*/<span class="params">(<span class="variable">$person</span>)</span>
+{</span>
+    <span class="variable">$person</span>-&gt;getName()-&gt;willReturn(<span class="string">'Jane'</span>);
+    <span class="variable">$person</span>-&gt;isFemale()-&gt;willReturn(<span class="keyword">true</span>);
+
+    <span class="variable">$this</span>-&gt;addressSomeoneWithSalutation(<span class="variable">$person</span>)
+        -&gt;shouldReturn(<span class="string">'Dear Ms. Jane'</span>);
+}</code></pre>
+<p>If you haven&#39;t realised yet with Mockery this spec will always fail, but not in
+an expected way (or a way that would occur in an actual runtime). The call
+to <code>$person-&gt;isMale()</code> will always evaluate to true (because the object <code>Mockery\Undefined</code>
+is returned and coerced to <code>true</code>), incorrectly giving us the salutation for a male.</p>
+<p>Prophecy on the other hand will not put up with this, failing the test with a
+useful message.</p>
+<p>[edit] This is because stubs in Prophecy are &quot;loose demand doubles&quot;, if you do not stub
+any methods on them, they will always return <code>null</code>. Once you stub a method they
+become &quot;strict demand doubles&quot; requiring you to stub all methods that your
+<abbr title="Subject Under Specification">SUS</abbr> is interacting with. <sup><a href="#ref-1">1</a></sup></p>
+<p><img src="https://raw.github.com/peterjmit/phpspec-prophecy-example/master/screenshots/method-not-stubbed.png" alt="Method not stubbed"></p>
+<p>We are therefore forced to stub <code>$person-&gt;isMale()</code> in order for our tests to pass
+ as shown in <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/1038519d8985dd095d92cb87d35e605caa728a13" title="Commit resolving un-stubbed method issue">this commit</a>.</p>
+<p>If you have a comment on this post, or if I have missed any of the standout
+new features then let me know <a href="https://twitter.com/peterjmit">on twitter</a> or
+<a href="mailto:pete@peterjmit.com?subject=Re: Why should you upgrade your test suite to PhpSpec & Prophecy">email me</a></p>
+<p><small id="ref-1">[1] thanks to <a href="https://twitter.com/everzet">@everzet</a> &amp; <a href="https://twitter.com/_md">@_md</a> for providing explanation on twitter</small></p>
+
+      </article>
+    </div>
+  </main>
+
+  <footer id="bottom" role="contentinfo">
+    <div class="block">
+      <hr>
+      <p class="copyright">
+        Peter Mitchell
+        <span class="muted">
+          &ndash; design by <a href="https://twitter.com/Natalie_Rauh">Natalie Rauh</a>
+        </span>
+      </p>
+
+      <ul class="social-icons">
+        <li title="See my answers on Stackoverflow">
+          <a target="_blank" href="http://stackoverflow.com/users/1041885/pete-mitchell">
+            <i class="icon stackoverflow"></i>
+          </a>
+        </li>
+        <li title="Take a look at my Github projects">
+          <a target="_blank" href="https://github.com/peterjmit">
+            <i class="icon github"></i>
+          </a>
+        </li>
+        <li title="Follow me on Twitter">
+          <a target="_blank" href="https://twitter.com/peterjmit">
+            <i class="icon twitter"></i>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-40298804-1', 'peterjmit.com');
+    ga('send', 'pageview');
+  </script>
+</body>
+</html>

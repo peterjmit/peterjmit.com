@@ -1,0 +1,51 @@
+// -----------------------------------------------------------------------------
+// Grid
+// -----------------------------------------------------------------------------
+.block {
+  margin: 0 auto;
+  padding: 0 5%;
+  max-width: 71.25em
+}
+
+.content {
+  padding: 3em 0;
+}
+
+.units {
+  @extend .cf;
+  margin:0 -$grid-gutter;
+}
+
+.unit {
+  box-sizing: border-box;
+  display: block;
+  float: left;
+  padding: 0 $grid-gutter;
+  width: 100%;
+  margin-bottom: 1em;
+}
+
+@media screen and (min-width: 45.0625em) {
+  #main .content .unit {
+    width: 50%;
+  }
+}
+
+@media screen and (min-width: 60.0625em) {
+  #main .content .unit {
+    width: 33.33333%;
+    margin-bottom: 0;
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Blog
+// -----------------------------------------------------------------------------
+.post {
+  max-width: 42em;
+}
+
+.post img {
+  max-width: 100%;
+}
+

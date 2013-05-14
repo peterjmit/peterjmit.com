@@ -1,0 +1,34 @@
+.hire {
+  font-family: $font-flair;
+  font-size: 1.3em;
+  color: #fff;
+  padding-top: 0.3em;
+  text-align: center;
+  width: 365px;
+  height: 39px;
+  display: block;
+  background-image: image-url('arrow.svg');
+}
+
+.hire a {
+  text-decoration: none;
+  color: #fff;
+}
+
+.icon {
+  display: block;
+  width: 36px;
+  height: 36px;
+}
+
+.icon.stackoverflow {
+  background-image: inline-image('so.svg');
+}
+
+.icon.twitter {
+  background-image: inline-image('twitter.svg');
+}
+
+.icon.github {
+  background-image: inline-image('git.svg');
+}

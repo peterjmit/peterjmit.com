@@ -1,0 +1,120 @@
+@import "compass/typography/vertical_rhythm";
+
+// -----------------------------------------------------------------------------
+// Rhythm
+// -----------------------------------------------------------------------------
+$base-font-size: 18px;
+$base-line-height: 32px;
+$default-rhythm-border-style: solid;
+$relative-font-sizing: true;
+$round-to-nearest-half-line: false;
+$min-line-padding: 2px;
+
+@include establish-baseline;
+
+body {
+    font-family: $font-body;
+    color: $body-font-colour;
+}
+
+// -----------------------------------------------------------------------------
+// Header styles
+// -----------------------------------------------------------------------------
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.5;
+  font-weight: normal;
+  font-family: $font-title;
+}
+
+h1, .h1 {
+  margin: 0 auto rhythm(1, 42px);
+}
+
+h2, .h2 {
+  margin: 0 auto rhythm(1, 38px);
+}
+
+h3, .h3 {
+  margin: 0 auto rhythm(1, 24px);
+}
+
+h4, .h4 {
+  margin: 0 auto rhythm(1, 20px);
+}
+
+h5, .h5 {
+  margin: 0 auto rhythm(1, 16px);
+}
+
+h6, .h6 {
+  margin: 0 auto rhythm(1, 12px);
+}
+
+// -----------------------------------------------------------------------------
+// Link styles
+// -----------------------------------------------------------------------------
+a:link {
+  color: $emphasis-primary-colour;
+}
+
+a:visited {
+  color: darken($emphasis-primary-colour, 30%)
+}
+
+a:focus,
+a:active {
+  color: darken($emphasis-secondary-colour, 10%);
+}
+
+a:hover,
+abbr:hover {
+  color: $emphasis-secondary-colour;
+}
+
+// -----------------------------------------------------------------------------
+// Typographic flair
+// -----------------------------------------------------------------------------
+.muted {
+  color: $muted-font-colour;
+}
+
+.muted {
+  a, a:visited {
+    color: $muted-font-colour;
+  }
+
+  a:hover,
+  a:focus,
+  a:active {
+    color: darken($muted-font-colour, 20%);
+  }
+}
+
+::selection {
+  background: lighten($emphasis-secondary-colour, 30%);
+}
+
+a.more:after {
+  content: $right-arrow;
+}
+
+.copyright:before {
+  content: $copyright;
+}
+
+abbr:hover {
+  cursor: help;
+}
+
+.bling {
+  font-style: normal;
+  color: $emphasis-primary-colour;
+}
+
+p code,
+li code {
+  background-color: $background-colour;
+  padding: 0.1em 0.3em;
+  border-radius:5px;
+}
+

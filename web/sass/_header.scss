@@ -1,0 +1,34 @@
+#top {
+  position: relative;
+  padding: 1em 0;
+}
+
+#top a {
+  color: $body-font-colour;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+#logo {
+  position: relative;
+  span {
+    position: absolute;
+    width: 200px;
+    padding-top: 1.4em;
+    left: 6em;
+  }
+}
+
+#nav {
+  position: absolute;
+  right: 2em;
+  top: 2.4em;
+}
+
+#nav a {
+  padding: 0.5em 1em;
+  &:hover {
+    color: $emphasis-secondary-colour;
+    background-color: $background-colour;
+  }
+}
