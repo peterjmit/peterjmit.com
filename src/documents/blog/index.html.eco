@@ -1,0 +1,16 @@
+---
+title: Blog
+isPage: true
+---
+<section class="hero small">
+  <h1><%= @document.title %></h1>
+</section>
+
+<br>
+<br>
+
+<section class="posts">
+  <% for post in @getCollection("posts").toJSON(): %>
+    <%= @partial('post_snippet.html.eco', @, { post: post }) %>
+  <% end %>
+</section>

@@ -4,9 +4,14 @@ layout: default
 <div class="content">
   <article class="post block">
     <header>
-      <h1><%= @document.title %></h1>
-      <time datetime="<%= @document.date %>"><%= @formatDate(@document.date) %></time>
+      <h1>
+        <%= @document.title %>
+      </h1>
+      <time datetime="<%= @document.date %>">
+        <%= @formatDate(@document.date) %>
+      </time>
     </header>
+
     <%- @content %>
   </article>
 </div>

@@ -9,19 +9,20 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title><%= @document.title %> :: Peter Mitchell :: Website and application developer</title>
-  <meta name="description" content="Peter Mitchell helps build online businesses and is interested in working with start-ups, small companies and individuals">
-  <meta name="keywords" content="web development, web applications, web developer, php developer, javascript developer, ecommerce">
+  <title><%= @getPageTitle() %></title>
+
+  <meta name="description" content="<%= @getMetaDescription() %>">
+  <meta name="keywords" content="<%= @getMetaKeywords() %>">
+  <meta name="author" content="<%= @site.author %>">
+  <meta name="email" content="<%= @site.email %>">
 
   <link href="/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link rel="stylesheet" href="http://yandex.st/highlightjs/7.3/styles/tomorrow.min.css">
+  <%- @getBlock('styles').toHTML() %>
 
   <link rel="shortcut icon" href="/favicon.ico">
 
   <script src="/js/fonts.js"></script>
-
-  <%- @getBlock('meta').toHTML() %>
-  <%- @getBlock('styles').toHTML() %>
 </head>
 
 <body>
@@ -34,7 +35,8 @@
       </a>
 
       <nav id="nav" role="navigation">
-          <a href="mailto:pete@peterjmit.com?subject=Hi!">Say hello</a>
+        <a href="/blog/">Blog</a>
+        <a href="mailto:<%= @site.email %>?subject=Hi!">Say hello</a>
       </nav>
     </div>
   </header>
@@ -56,7 +58,6 @@
       <%- @partial 'social.html' %>
     </div>
   </footer>
-
 
   <%- @getBlock('scripts').toHTML() %>
 
