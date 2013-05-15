@@ -10,7 +10,7 @@ role :db,         domain, :primary => true
 set :repository,  "git@bitbucket.org:peterjmit/peterjmit.com.git"
 set :scm,         :git
 set :deploy_via,  :remote_cache
-set :branch,    "develop"
+set :branch,    "gh-pages"
 
 set :user, "pete"
 set :use_sudo, false
