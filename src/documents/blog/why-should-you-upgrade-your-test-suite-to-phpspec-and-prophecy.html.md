@@ -4,7 +4,6 @@ layout: post
 date: 2013-05-06
 tags: [php, bdd]
 ```
-
 PhpSpec has recently dropped a 2.0 beta, and it has moved from the mock object
 framework "Mockery" in favour of a new framework called
 [Prophecy](https://github.com/phpspec/prophecy).
@@ -18,13 +17,11 @@ framework "Mockery" in favour of a new framework called
 Having done the above, your test suite should run but you may see some new failures due to the way Prophecy works
 
 1. [PhpSpec will not let you use methods that are undefined on collaborators](#undefined-methods)
-2. [Any method called during a spec has to be stubbed](#stub-methods)
-
-<hr>
-
-Documentation is a bit sparse on the ground (but you can [contribute](https://github.com/phpspec/phpspec)) so hopefully I can give you a couple of pointers for upgrading your test suite. I have created an [example repository][1] to try and give a quick guide through some of the updates and differences between PhpSpec/Mockery & PhpSpec/Prophecy.
+2. [Stubs in PhpSpec/Prophecy are "all or nothing"](#stub-methods)
 
 ## First step &ndash; update/install PhpSpec with Prophecy
+
+Documentation is a bit sparse on the ground (but you can [contribute](https://github.com/phpspec/phpspec)) so hopefully I can give you a couple of pointers for upgrading your test suite. I have created an [example repository][1] to try and give a quick guide through some of the updates and differences between PhpSpec/Mockery & PhpSpec/Prophecy.
 
 I am assuming you are using composer you can get a fresh copy of PhpSpec by adding
 or editing the following dependency in `composer.json`
@@ -93,7 +90,7 @@ return an instance of `Mockery\Undefined`. This is problematic, because if you
 use loose comparisons, your test suite may behave unexpectedly. If you consider
 the following block of code that was added in [this commit][5]
 
-```javascript
+```php
 // ...
 if ($person->isMale()) {
     $salutation = 'Mr. ';

@@ -3,6 +3,7 @@ title: Be careful with global variables in Symfony 2 Twig extensions
 layout: post
 date: 2013-05-14
 tags: [php, symfony2, twig]
+ignored: true
 ```
 
 I stumbled across a confusing error message while developing some new
