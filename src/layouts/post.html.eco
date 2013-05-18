@@ -12,6 +12,8 @@ layout: default
       </time>
     </header>
 
+    <hr>
+
     <%- @content %>
   </article>
 </div>

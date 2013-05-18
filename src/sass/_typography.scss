@@ -4,51 +4,93 @@
 // Rhythm
 // -----------------------------------------------------------------------------
 $base-font-size: 18px;
-$base-line-height: 32px;
+$base-line-height: 29px;
 $default-rhythm-border-style: solid;
 $relative-font-sizing: true;
 $round-to-nearest-half-line: false;
 $min-line-padding: 2px;
 
+// Header sizes
+$h1-size: 42px;
+$h2-size: 26px;
+$h3-size: 22px;
+$h4-size: 20px;
+$h5-size: 16px;
+$h6-size: 12px;
+
 @include establish-baseline;
 
 body {
-    font-family: $font-body;
-    color: $body-font-colour;
+  font-family: $font-body;
+  color: $body-font-colour;
+  background-color: #fafafa;
+}
+
+p {
+  margin: 0 auto rhythm(1, 18px);
 }
 
 // -----------------------------------------------------------------------------
 // Header styles
 // -----------------------------------------------------------------------------
 h1, h2, h3, h4, h5, h6 {
-  line-height: 1.5;
-  font-weight: normal;
+  margin: 0;
   font-family: $font-title;
 }
 
 h1, .h1 {
-  margin: 0 auto rhythm(1, 42px);
+  font-weight: normal;
+  @include adjust-font-size-to($h1-size);
+  margin-bottom: rhythm(1, $h1-size);
 }
 
 h2, .h2 {
-  margin: 0 auto rhythm(1, 38px);
+  @include adjust-font-size-to($h2-size);
+  margin-bottom: rhythm(0.5, $h2-size);
 }
 
 h3, .h3 {
-  margin: 0 auto rhythm(1, 24px);
+  @include adjust-font-size-to($h3-size);
+  margin-bottom: rhythm(0.5, $h3-size);
+  color: lighten($body-font-colour, 10%);
 }
 
 h4, .h4 {
-  margin: 0 auto rhythm(1, 20px);
+  @include adjust-font-size-to($h4-size);
+  margin-bottom: rhythm(0.5, $h4-size);
 }
 
 h5, .h5 {
-  margin: 0 auto rhythm(1, 16px);
+  @include adjust-font-size-to($h5-size);
+  margin-bottom: rhythm(0.5, $h5-size);
 }
 
 h6, .h6 {
-  margin: 0 auto rhythm(1, 12px);
+  @include adjust-font-size-to($h6-size);
+  margin-bottom: rhythm(0.5, $h6-size);
 }
+
+// Paragraph styles
+p+h2, ul+h2, ol+h2, pre+h2 {
+  margin-top: rhythm(2, $h2-size);
+}
+
+p+h3, ul+h3, ol+h3, pre+h3 {
+  margin-top: rhythm(2, $h3-size);
+}
+
+p+h4, ul+h4, ol+h4, pre+h4 {
+  margin-top: rhythm(2, $h4-size);
+}
+
+p+h5, ul+h5, ol+h5, pre+h5 {
+  margin-top: rhythm(2, $h5-size);
+}
+
+p+h6, ul+h6, ol+h6, pre+h6 {
+  margin-top: rhythm(2, $h6-size);
+}
+
 
 // -----------------------------------------------------------------------------
 // Link styles
@@ -74,6 +116,30 @@ abbr:hover {
 // -----------------------------------------------------------------------------
 // Typographic flair
 // -----------------------------------------------------------------------------
+abbr:hover {
+  cursor: help;
+}
+
+blockquote {
+  font-style: italic;
+}
+
+pre code {
+  background-color: darken(#fafafa, 2.5%);
+  padding: rhythm(1, 18px);
+}
+
+p code,
+li code {
+  background-color: darken(#fafafa, 7.5%);
+  padding: 0.1em 0.3em;
+  border-radius:5px;
+}
+
+hr {
+  margin: 1.5em 0;
+}
+
 .muted {
   color: $muted-font-colour;
 }
@@ -102,19 +168,7 @@ a.more:after {
   content: $copyright;
 }
 
-abbr:hover {
-  cursor: help;
-}
-
 .bling {
   font-style: normal;
   color: $emphasis-primary-colour;
 }
-
-p code,
-li code {
-  background-color: $background-colour;
-  padding: 0.1em 0.3em;
-  border-radius:5px;
-}
-

@@ -41,7 +41,7 @@ docpadConfig =
       @getCollection("html").findAllLive({ isPage: true })
 
     posts: ->
-      @getFilesAtPath("blog").findAllLive({ isPage: false })
+      @getFilesAtPath("blog").findAllLive({ isPage: false }, [ date: -1 ])
 
 
   events:
