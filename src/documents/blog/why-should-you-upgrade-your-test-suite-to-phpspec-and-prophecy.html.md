@@ -15,19 +15,14 @@ framework "Mockery" in favour of a new framework called
 3. Rename all your `spec/<MyClass>` specs to `spec/<MyClass>Spec`
 4. Replace the `ANY_ARGUMENT` constant with `Prophecy\Argument::any()`
 
-Having done the above, your test suite should run but you may see some new failures
-due to the way Prophecy works
+Having done the above, your test suite should run but you may see some new failures due to the way Prophecy works
 
 1. [PhpSpec will not let you use methods that are undefined on collaborators](#undefined-methods)
 2. [Any method called during a spec has to be stubbed](#stub-methods)
 
 <hr>
 
-Documentation is a bit sparse on the ground ([contribute](https://github.com/phpspec/phpspec))
-so hopefully I can give you a couple of pointers for upgrading your test suite.
-
-I have created an [example repository][1] to try and give a quick guide through
-some of the updates and differences between PhpSpec/Mockery & PhpSpec/Prophecy.
+Documentation is a bit sparse on the ground (but you can [contribute](https://github.com/phpspec/phpspec)) so hopefully I can give you a couple of pointers for upgrading your test suite. I have created an [example repository][1] to try and give a quick guide through some of the updates and differences between PhpSpec/Mockery & PhpSpec/Prophecy.
 
 ## First step &ndash; update/install PhpSpec with Prophecy
 
@@ -52,15 +47,11 @@ changes.
 
 ### PhpSpec has a new namespace
 
-The namespace `PHPSpec2` has changed to `PhpSpec`
-
-For example many of your specs will will extend `PHPSpec2\ObjectBehavior`,
-so you will want to update your use statement to `use PhpSpec\ObjectBehavior;`
+The namespace `PHPSpec2` has changed to `PhpSpec`, for example many of your specs will will extend `PHPSpec2\ObjectBehavior`, so you will want to update your use statement to `use PhpSpec\ObjectBehavior;`.
 
 ### Spec files/classes now have the suffix "Spec"
 
-If you are upgrading existing specs, you will need to rename your spec for `HelloWorld.php`
-to `HelloWorldSpec.php`.
+If you are upgrading existing specs, you will need to rename your spec for `HelloWorld.php` to `HelloWorldSpec.php`.
 
 ### The ANY_ARGUMENT(S) constant has gone
 
@@ -71,10 +62,7 @@ $mockObject->methodStub(ANY_ARGUMENT);
 ```
 
 Prophecy handles [arguments wildcarding][3] slightly differently. If you take a
-look at our initial spec again you will see that `phpspec desc` generates a spec
-with a use statement for `Prophecy\Argument`.
-
-If you want a direct replacement for `ANY_ARGUMENT` then you should use
+look at our initial spec again you will see that `phpspec desc` generates a spec with a use statement for `Prophecy\Argument`. If you want a direct replacement for `ANY_ARGUMENT` then you should use:
 
 ```php
 $mockObject->methodStub(Prophecy\Argument::any());
