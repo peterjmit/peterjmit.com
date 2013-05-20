@@ -1,7 +1,7 @@
 ```
 title: Why should you upgrade your test suite to PhpSpec & Prophecy
 layout: post
-date: 2013-05-06
+date: 2013/05/06
 tags: [PHP, BDD]
 ```
 PhpSpec has recently dropped a 2.0 beta, and it has moved from the mock object
