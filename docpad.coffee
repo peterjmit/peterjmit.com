@@ -28,7 +28,7 @@ docpadConfig =
 
     getMetaKeywords: -> @site.keywords.concat(@document.tags or []).join(", ")
 
-    formatDate: (date,format = "MMM Do, YYYY") ->
+    formatDate: (date, format = "MMM Do, YYYY") ->
       moment(date).format(format)
 
   collections:

@@ -1,9 +1,8 @@
 ```
 title: Be careful with global variables in Symfony 2 Twig extensions
 layout: post
-date: 2013-05-14
-tags: [php, symfony2, twig]
-ignored: true
+date: 2013-05-20
+tags: [PHP, Symfony2, Twig]
 ```
 
 I stumbled across a confusing error message while developing some new
