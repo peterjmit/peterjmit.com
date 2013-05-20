@@ -28,9 +28,8 @@ Paul Irish's [blog post][1]).
 public function getRouteInfo()
 {
     $request = $this->container->get('request');
-    $route = $request->attributes->get('_route');
 
-    // ...
+    // ... process the route information
 
     return $routeInfo;
 }
@@ -66,9 +65,8 @@ public function getRouteInfo()
     }
 
     $request = $this->container->get('request');
-    $route = $request->attributes->get('_route');
 
-    // ...
+    // ... 
 
     return $routeInfo;
 }
