@@ -121,7 +121,10 @@ abbr:hover {
 }
 
 blockquote {
-  font-style: italic;
+  padding-left: 1.5em;
+  margin: 0 1.5em;
+  border-left: 7px $emphasis-secondary-colour solid;
+  color: lighten($body-font-colour, 25%);
 }
 
 pre code {
