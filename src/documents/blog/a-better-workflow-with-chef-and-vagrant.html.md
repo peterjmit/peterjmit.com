@@ -260,6 +260,10 @@ your cookbooks for you and report errors, deprecated syntax etc. I highly
 recommend installing it to catch any errors before trying to provision your
 cookbooks.
 
+Please [give me a shout on twitter](https://twitter.com/peterjmit) if you have
+any comments, contributions or corrections for this blog post, all constructive
+feedback is welcome.
+
 
 _Many thanks to Riot Games, Jamie Winsor, and Opscode for open sourcing great
 tools and making high quality learning materials available online_
