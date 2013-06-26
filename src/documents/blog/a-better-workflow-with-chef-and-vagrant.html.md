@@ -36,11 +36,11 @@ assuming Chef is actually installed on the box, I have often found the VirtualBo
 additions to be out of date which can cause problems. Not to mention I am stuck
 if I cannot find a box for the OS I want to install.
 
-Fortunately Veewee takes all the pain out of this process, with a few commands
-you tell Veewee what OS you wanto install, and then it makes it ready for Vagrant
-simple as that. The instructions for Veewee are well documented in the
-[repository][2] and in Phil Sturgeon's [blog post][1] which originally led me to
-Veewee.
+Fortunately Veewee takes all the pain out of this process, with a couple of commands
+you tell Veewee what OS you want to install, and fulfils all the prerequisites
+necessary for Vagrant (or VMWare, KVM, Parallels for that matter). The instructions
+for Veewee are well documented in the [repository][2] and in Phil Sturgeon's
+[blog post][1] which originally led me to Veewee.
 
 <h2 id="simplify-chef">2. Simplify the approach to Chef</h2>
 
@@ -53,11 +53,11 @@ months later.
 __The problem__
 
 I set up my chef repository a while back, and I thought I was doing everything
-as I should, I had some community cookbooks, some github cookbooks (modified
+as I should, I had some community cookbooks, some Github cookbooks (modified
 as part of my chef-repo), and some custom cookbooks all in the same repository.
-I then had roles naemd things like "database", "application" or "cache" and
+I then had roles named things like "database", "application" or "cache" and
 it all seemed to fit together nicely. These roles could then be composed to build
-a server to host _any_ application, theoretically keeping things seperated and
+a server to host _any_ application, theoretically keeping things separated and
 re-usable.
 
 The problem came when it was time to change the software stack slightly.
@@ -111,7 +111,7 @@ application/service becomes very clear.
 > To add the "curl" package to "my-awesome-application" I can checkout
 > the "my-awesome-cookbook" and add a step to the "app server" recipe
 
-At the most simple level and if you are just getting started, most recipies will
+At the most simple level and if you are just getting started, most recipes will
 serve as wrappers around existing cookbooks setting defaults or creating options
 for software that tailored to your organisation or that are required by the
 frameworks that you are using. As your understanding and requirements increase
@@ -121,7 +121,7 @@ cookbooks/recipes so if you haven't already, you should [watch it][4].
 
 If it isn't already clear, it is important that your application cookbooks stay
 isolated for them to be useful (ideally in their own version controlled
-repository, seperated from the Chef repository you may be used to). Cookbooks are
+repository, separated from the Chef repository you may be used to). Cookbooks are
 powerful in that Chef provides a metadata file for defining dependencies and
 their versions, however the default Chef setup means that these dependencies
 become part of your repository and this is not ideal, this brings me to a
@@ -142,7 +142,7 @@ It is this issue that prompted me to look for a better way, and [Berkshelf][6]
 seems to be the answer. Berkshelf provides the solution to writing a cookbook
 in isolation, and lets you pull in 3rd party cookbooks from _any_ location
 whether that be Opscode, a git repository or even your local filesystem. When you
-pull in those dependencies, they stay seperate from your cookbook just as with
+pull in those dependencies, they stay separate from your cookbook just as with
 ruby gems, or npm.
 
 ### A basic example of the workflow in action
@@ -210,7 +210,7 @@ Next you can create a recipe for the web server to tie this all together and
 configure nginx
 
 ```ruby
-# recipies/web_server.rb
+# recipes/web_server.rb
 
 # You configure some the nginx attributes in the recipe
 # for example, turning gzip off
@@ -222,10 +222,10 @@ include_recipe 'nginx'
 ```
 
 If suitable for your application, you can add your components
-to `recipies/default.rb` to allow installation of the full application via
+to `recipes/default.rb` to allow installation of the full application via
 
 ```ruby
-# recipies/default.rb
+# recipes/default.rb
 
 include_recipe 'my-static-blog::web_server'
 ```
