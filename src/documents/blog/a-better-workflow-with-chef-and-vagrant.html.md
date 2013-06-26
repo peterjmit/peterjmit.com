@@ -2,7 +2,7 @@
 title: A better workflow with Chef & Vagrant
 layout: post
 date: 2013/06/26
-tags: [Workflow, Devops]
+tags: [Chef, Vagrant, Workflow, Devops]
 ```
 
 I have been using the Chef and Vagrant combo for a little under a year now and it
@@ -263,7 +263,6 @@ cookbooks.
 Please [give me a shout on twitter](https://twitter.com/peterjmit) if you have
 any comments, contributions or corrections for this blog post, all constructive
 feedback is welcome.
-
 
 _Many thanks to Riot Games, Jamie Winsor, and Opscode for open sourcing great
 tools and making high quality learning materials available online_
