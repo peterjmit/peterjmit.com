@@ -325,7 +325,7 @@ finding out what class a service is, for example if you want to find out what
 $ php app/console container:debug | grep templating
 ```
 
-<hr>
+*****
 
 Please get in touch with me on [twitter](https://twitter.com/peterjmit) if you
 have any comments, or [fork this blog post][17] and contribute!
