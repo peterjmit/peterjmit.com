@@ -127,19 +127,6 @@ blockquote {
   color: lighten($body-font-colour, 25%);
 }
 
-pre code {
-  background-color: darken(#fafafa, 2.5%);
-  padding: rhythm(1, 18px);
-}
-
-p code,
-li code {
-  background-color: darken(#fafafa, 7.5%);
-  padding: 0.1em 0.3em;
-  border-radius: 5px;
-  white-space: nowrap;
-}
-
 hr {
   margin: 1.5em 0;
 }
@@ -175,4 +162,27 @@ a.more:after {
 .bling {
   font-style: normal;
   color: $emphasis-primary-colour;
+}
+
+// -----------------------------------------------------------------------------
+// Code blocks
+// -----------------------------------------------------------------------------
+pre {
+  overflow: auto;
+  width: auto;
+  background-color: darken(#fafafa, 2.5%);
+  word-wrap: normal;
+  white-space: pre;
+}
+
+pre code {
+  padding: rhythm(1, 18px);
+}
+
+p code,
+li code {
+  background-color: darken(#fafafa, 7.5%);
+  padding: 0.1em 0.3em;
+  border-radius: 5px;
+  white-space: nowrap;
 }
