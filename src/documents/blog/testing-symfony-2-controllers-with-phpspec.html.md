@@ -1,7 +1,7 @@
 ```
 title: Testing Symfony 2 Controllers with PhpSpec
 layout: post
-date: 2013/08/16
+date: 2013/08/19
 tags: [PHP, BDD, Symfony2]
 ```
 
