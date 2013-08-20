@@ -1,16 +1,17 @@
 ```
-title: Testing Symfony 2 Controllers with PhpSpec
+title: Getting started with PhpSpec and Symfony 2
 layout: post
 date: 2013/08/19
 tags: [PHP, BDD, Symfony2]
 ```
 
-In order to effectively test any class, you have to understand at a basic level
-how the class functions. These examples will give an introduction explain how to
-test a Symfony 2 controller using PhpSpec (but the ideas apply to using any
-testing framework). They also completely abandon the BDD workflow that PhpSpec
-is designed to be used within (this is well documented elsewhere so this
-post will not cover it).
+This is the first post in a series of posts that will take you through a step by
+step guide to getting started with PhpSpec and Symfony 2.
+
+This first post is going to look at how a controller works within Symfony 2 and
+how we might begin to start writing specifications for one (as such the following
+examples should not be used in practice). Subsequent posts will refactor these
+examples incorporating some techniques for better application structure.
 
 To follow these examples you will need to install the Symfony 2 standard edition
 with PhpSpec. I have created a [repository with all the example code][15] and you
@@ -43,15 +44,15 @@ class BlogController extends Controller
 }
 ```
 
-In order to get started we need to create the spec file for our `BlogController`
+Using PhpSpec we can create a spec file for our `BlogController`
 
 ```bash
 $ ./bin/phpspec describe Peterjmit/BlogBundle/Controller/BlogController
 ```
 
-Now we can start specifying behaviours for our controller by adding methods to
-our Spec class, and as we already have an `indexAction` in `BlogController`, we
-can start trying to describe the behaviour of that action.
+The next step is to start specifying behaviours for our controller by adding
+methods to our Spec class, and as we already have an `indexAction` in
+`BlogController`, we can start trying to describe the behaviour of that action.
 
 ```php
 // spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php
@@ -165,8 +166,9 @@ get repository for our Blog entity. If you take a look at the method you will se
 that it checks the container to see if the doctrine service is registered,
 and returns it if it is.
 
-In order to get a mock of the repository (and our list of blog posts) we need an
-to understand the collaborators that are involved in retrieving it - here is a list:
+In order to mock the repository (and get a list of blog posts) we need
+to understand the collaborators that are involved in retrieving it from the
+doctrine service, here is a list:
 
 * `Doctrine\Common\Persistence\ManagerRegistry#getManager`
 * `Doctrine\Common\Persistence\ObjectManager#getRepository`
@@ -226,10 +228,20 @@ class BlogControllerSpec extends ObjectBehavior
     }
 }```
 
+At this point it is worth noting that it was somewhat of a hassle to set up all
+the collaborators involved for getting a repository. When something is difficult
+or _inconvenient_ to test it is an indicator that you need to look at a different
+way of achieving the behaviour.
+
+In this example our controller _knows_ too much about the implementation of
+retrieving blog posts, and refactoring should aim to reduce the number of
+collaborators - my next blog post will discuss how we can do this in a Symfony
+application.
+
 ### Stubbing templating
 
 The final method we use from the framework bundle controller is [`render`][13].
-Ihis method is a _proxy_ method to the `renderResponse` method on the `templating`
+This method is a _proxy_ method to the `renderResponse` method on the `templating`
 service which in the Symfony 2 standard edition is an instance of
 [`EngineInterface`][14].
 
@@ -278,10 +290,10 @@ class BlogControllerSpec extends ObjectBehavior
     }
 ```
 
-The [final code][16] for our specification can be seen in the github repository I
-mentioned at the beginning. It is important to note that we didn't have to define
-any routing, write any entities (or mapping) to write a valid controller. This
-is part of the beauty of a BDD approach is that it allows you to focus on one
+The [final code][16] for our specification can be seen in the [github repository][15]
+I mentioned at the beginning. It is important to note that we didn't have to
+define any routing, write any entities (or mapping) to write a valid controller.
+This is part of the beauty of a BDD approach is that it allows you to focus on one
 cog in the machine at a time.
 
 ## This is not the right way&trade;
@@ -289,42 +301,24 @@ cog in the machine at a time.
 As with many complex topics in education, you need to un-learn what you were
 taught at the beginning to get to the next level. Hopefully you will realise is
 that writing the above specifications and implementations for every controller
-in your application is rather cumbersome and in violation of a whole bunch
-of good practices.
+in your application is rather cumbersome and will create a lot of repetition
+in your code base.
 
 Advice for solving some of the problems introduced by the above examples is
-outside of the scope of this post, however I have provided some links below
-to explain some of the bad practices and give you some ideas for solutions.
+outside of the scope of this initial post but we will cover it next time. Until
+then here are some good resources that should begin to describe the problems and
+suggest some solutions.
 
-#### Suggested reading
-* [phpspec2: SUS and collaborators][7]
-* [An explanation for fakes, stubs, mocks and spies][4]
 * [From STUPID to SOLID Code!](http://williamdurand.fr/2013/07/30/from-stupid-to-solid-code)
 * [Symfony2: Controller as Service](http://richardmiller.co.uk/2011/04/15/symfony2-controller-as-service/)
 * [Extending Symfony2: Controller Utilities](http://www.whitewashing.de/2013/06/27/extending_symfony2__controller_utilities.html)
 * [Putting your Symfony2 controllers on a diet, part 2](http://iamproblematic.com/2012/03/12/putting-your-symfony2-controllers-on-a-diet-part-2/)
+
+#### Some additional resources for PhpSpec
+
+* [phpspec2: SUS and collaborators][7]
+* [An explanation for fakes, stubs, mocks and spies][4]
 * [A start to writing a Symfony2 extension for PhpSpec](https://github.com/phpspec/Symfony2Extension)
-
-## A couple of tips to make this a bit easier
-
-When you are writing tests for classes that rely on third party libraries
-it can be very time consuming tracking down all of the interfaces and method
-signatures so that you can mock them. Fortunately there are some tools to help:
-
-#### Use fuzzy search
-In sublime text (vim and PHPStorm have similar functionality)
-you can hit `Ctrl+P` to access fuzzy search allowing you to quickly track down
-and inspect classes/interfaces (otherwise there is always github).
-
-#### Inspecting service implementations
-The `container:debug` console command combined with `grep` is invaluable for
-finding out what class a service is, for example if you want to find out what
-`templating` is you can run the following command:
-
-```bash
-$ php app/console container:debug | grep templating
-```
-
 *****
 
 Please get in touch with me on [twitter](https://twitter.com/peterjmit) if you
@@ -347,3 +341,4 @@ have any comments, or [fork this blog post][17] and contribute!
 [15]: https://github.com/peterjmit/testing-symfony2-controllers-with-phpspec/commits
 [16]: https://github.com/peterjmit/testing-symfony2-controllers-with-phpspec/blob/master/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php
 [17]: https://github.com/peterjmit/peterjmit.com/blob/master/src/documents/blog/testing-symfony-2-controllers-with-phpspec.html.md
+[18]: http://www.slideshare.net/marcello.duarte/full-stack-bdd-for-symfony2
