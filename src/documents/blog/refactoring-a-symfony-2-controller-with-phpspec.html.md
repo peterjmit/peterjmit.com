@@ -192,8 +192,7 @@ the following for removing logic from your controllers:
 #### See also
  * [Emergent design with PhpSpec][15]
 
-
-***
+<br>
 
 <small>
   1. This problem is formalised by the [Law of Demeter][14] and this principal is

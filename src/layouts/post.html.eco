@@ -15,5 +15,7 @@ layout: default
     <hr>
 
     <%- @content %>
+
+    <%- @partial('tweet_buttons.html', @, { post: @document }) %>
   </article>
 </div>
