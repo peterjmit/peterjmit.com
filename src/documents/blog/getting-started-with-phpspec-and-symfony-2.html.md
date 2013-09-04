@@ -6,7 +6,11 @@ tags: [PHP, BDD, Symfony2]
 ```
 
 This is the first post in a series of posts that will take you through a step by
-step guide to getting started with PhpSpec and Symfony 2.
+step guide to getting started with PhpSpec and Symfony 2. If you want to skip
+straight to a _better_ approach for testing controllers check out my [second post][19]
+in this series.
+
+* Post 2: [Refactoring a Symfony 2 Controller with PhpSpec][19]
 
 This first post is going to look at how a controller works within Symfony 2 and
 how we might begin to start writing specifications for one (as such the following
@@ -338,7 +342,8 @@ have any comments, or [fork this blog post][17] and contribute!
 [12]: https://github.com/doctrine/common/tree/master/lib/Doctrine/Common/Persistence
 [13]: https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/FrameworkBundle/Controller/Controller.php#L104
 [14]: https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/FrameworkBundle/Templating/EngineInterface.php
-[15]: https://github.com/peterjmit/testing-symfony2-controllers-with-phpspec/commits
-[16]: https://github.com/peterjmit/testing-symfony2-controllers-with-phpspec/blob/master/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php
-[17]: https://github.com/peterjmit/peterjmit.com/blob/master/src/documents/blog/testing-symfony-2-controllers-with-phpspec.html.md
+[15]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commits
+[16]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/master/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php
+[17]: https://github.com/peterjmit/peterjmit.com/blob/master/src/documents/blog/getting-started-with-phpspec-and-symfony-2.html.md
 [18]: http://www.slideshare.net/marcello.duarte/full-stack-bdd-for-symfony2
+[19]: /blog/refactoring-a-symfony-2-controller-with-phpspec.html
