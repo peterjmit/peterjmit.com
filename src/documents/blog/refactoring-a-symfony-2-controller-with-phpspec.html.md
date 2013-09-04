@@ -78,7 +78,9 @@ Therefore we are going to lose our dependency on
 we can construct our controller with templating and doctrine instead as shown
 in [this commit][4].
 
-That commit however does not go far enough, so let [get rid of doctrine][5] too
+That commit however does not go far enough, so lets [get rid of doctrine][5] too.
+We do this by introducing the interface `BlogManagerInterface`, that will
+provide the controller with the blog posts that it needs.
 
 ```php
 // ...
