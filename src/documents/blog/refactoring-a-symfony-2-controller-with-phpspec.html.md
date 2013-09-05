@@ -212,5 +212,5 @@ the following for removing logic from your controllers:
 [11]: http://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html
 [12]: http://whitewashing.de/2013/02/19/extending_symfony2__paramconverter.html
 [13]: http://www.whitewashing.de/2013/06/27/extending_symfony2__controller_utilities.html
-[14]: http://www.slideshare.net/marcello.duarte/emergent-design-with-phpspec
-[15]: http://en.wikipedia.org/wiki/Law_of_Demeter
+[14]: http://en.wikipedia.org/wiki/Law_of_Demeter
+[15]: http://www.slideshare.net/marcello.duarte/emergent-design-with-phpspec
