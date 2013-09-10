@@ -79,28 +79,31 @@ we can construct our controller with templating and doctrine instead as shown
 in [this commit][4].
 
 That commit however does not go far enough, so lets [get rid of doctrine][5] too.
-We do this by introducing the interface `BlogManagerInterface`, that will
-provide the controller with the blog posts that it needs.
+We do this by introducing the repository `BlogRepository` directly, providing
+the controller with the blog posts that it needs.
+
+_edit: after some feedback I simplified the introduction of `BlogManagerInterface`
+by switching it to directly injecting the repository [in this commit][16]_
 
 ```php
 // ...
-use Peterjmit\BlogBundle\Model\BlogManagerInterface;
+use Peterjmit\BlogBundle\Doctrine\BlogRepository;
 use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
 
 class BlogController
 {
-    private $manager;
+    private $repository;
     private $templating;
 
-    public function __construct(BlogManagerInterface $manager, EngineInterface $templating)
+    public function __construct(BlogRepository $repository, EngineInterface $templating)
     {
-        $this->manager = $manager;
+        $this->repository = $repository;
         $this->templating = $templating;
     }
 
     public function indexAction()
     {
-        $posts = $this->manager->findAll();
+        $posts = $this->repository->findAll();
 
         return $this->templating->renderResponse('PeterjmitBlogBundle:Blog:index.html.twig', array(
             'posts' => $posts
@@ -109,11 +112,9 @@ class BlogController
 
     public function showAction($id)
     {
-        $post = $this->manager->find($id);
+        $post = $this->repository->find($id);
 
-        if (!$post) {
-            throw $this->createNotFoundException(sprintf('Blog post %s was not found', $id));
-        }
+        // ...
 
         return $this->templating->renderResponse('PeterjmitBlogBundle:Blog:show.html.twig', array(
             'post' => $post
@@ -131,10 +132,10 @@ By now our spec is looking a lot less _difficult_ to work with, so we can introd
 class BlogControllerSpec extends ObjectBehavior
 {
     function let(
-        BlogManagerInterface $manager,
+        BlogRepository $repository,
         EngineInterface $templating
     ) {
-        $this->beConstructedWith($manager, $templating);
+        $this->beConstructedWith($repository, $templating);
     }
 
     function it_is_initializable()
@@ -143,16 +144,16 @@ class BlogControllerSpec extends ObjectBehavior
     }
 
     function it_should_respond_to_index_action(
-        BlogManagerInterface $manager,
+        BlogRepository $repository,
         EngineInterface $templating,
         Response $mockResponse
     ) {
-        $manager->findAll()->willReturn(array());
+        $repository->findAll()->willReturn(array('An array', 'of blog', 'posts!'));
 
         $templating
             ->renderResponse(
                 'PeterjmitBlogBundle:Blog:index.html.twig',
-                array('posts' => array())
+                array('posts' => array('An array', 'of blog', 'posts!'))
             )
             ->willReturn($mockResponse)
         ;
@@ -204,13 +205,14 @@ the following for removing logic from your controllers:
 [3]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commits/master
 [4]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commit/3d5de3432698af520eb30c915e278d39bf53093a
 [5]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commit/4a87e1d447c106e479b335a0a95c81d4feddfefa
-[6]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commit/f9391b7ab4ed7e397dba92a7f6f77f979f04bb8f
-[7]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commit/c2ecd55091b8e2003ee8633fa96af2690dcbc10f
-[8]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/c2ecd55091b8e2003ee8633fa96af2690dcbc10f/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php
-[9]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/c2ecd55091b8e2003ee8633fa96af2690dcbc10f/src/Peterjmit/BlogBundle/Controller/BlogController.php
+[6]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/d930a806641a10706c2ed2d61219de660a8e93bb/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php#L47
+[7]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/d930a806641a10706c2ed2d61219de660a8e93bb/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php#L65
+[8]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/d930a806641a10706c2ed2d61219de660a8e93bb/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php
+[9]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/d930a806641a10706c2ed2d61219de660a8e93bb/src/Peterjmit/BlogBundle/Controller/BlogController.php
 [10]: http://symfony.com/doc/current/cookbook/controller/service.html
 [11]: http://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html
 [12]: http://whitewashing.de/2013/02/19/extending_symfony2__paramconverter.html
 [13]: http://www.whitewashing.de/2013/06/27/extending_symfony2__controller_utilities.html
 [14]: http://en.wikipedia.org/wiki/Law_of_Demeter
 [15]: http://www.slideshare.net/marcello.duarte/emergent-design-with-phpspec
+[16]: https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commit/d930a806641a10706c2ed2d61219de660a8e93bb
