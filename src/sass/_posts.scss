@@ -9,7 +9,7 @@
 }
 
 .post--short {
-  border-bottom: 1px darken($background-colour, 5%) solid;
+  border-bottom: 1px solid $border-colour;
   margin-bottom: 1.5rem;
   padding-bottom: 1.5rem;
 }

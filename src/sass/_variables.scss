@@ -4,6 +4,7 @@ $emphasis-primary-colour: #5191d0;
 $emphasis-secondary-colour: #d97c34;
 $body-font-colour: #333333;
 $muted-font-colour: #999;
+$border-colour: darken($background-colour, 5%);
 
 // Fonts
 $font-body: 'Varela Round', sans-serif;
@@ -16,3 +17,4 @@ $grid-gutter: 1.5em;
 // HTML entities
 $right-arrow: '\2192';
 $copyright: '\00a9';
+

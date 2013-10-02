@@ -1,6 +1,7 @@
 #bottom {
   @extend .cf;
-  padding: 6em 0 2em 0;
+  padding: 3em 0 2em 0;
+  border-top: 1px solid $border-colour;
 }
 
 #bottom .copyright {
