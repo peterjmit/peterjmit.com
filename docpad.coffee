@@ -59,6 +59,11 @@ docpadConfig =
       # Chain
       return @
 
+  plugins:
+    rss:
+      collection: 'posts'
+      url: '/blog/rss.xml'
+
   # Need to work out if we can set environments in grunt for this
   # environments:
   #   static:
