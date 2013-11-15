@@ -31,6 +31,12 @@ docpadConfig =
     formatDate: (date, format = "MMM Do, YYYY") ->
       moment(date).format(format)
 
+    hasChart: ->
+      !!@document.meta.chartScript
+
+    getChartPartial: ->
+      @partial @document.meta.chartScript
+
   collections:
     # add some default meta data
     all: ->
