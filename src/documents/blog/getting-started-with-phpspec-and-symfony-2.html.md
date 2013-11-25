@@ -320,7 +320,7 @@ suggest some solutions.
 
 #### Some additional resources for PhpSpec
 
-* [phpspec2: SUS and collaborators][7]
+* [phpspec2: SUS and collaborators][6]
 * [An explanation for fakes, stubs, mocks and spies][4]
 * [A start to writing a Symfony2 extension for PhpSpec](https://github.com/phpspec/Symfony2Extension)
 *****

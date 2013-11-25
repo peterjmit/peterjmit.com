@@ -38,7 +38,7 @@ class BlogController extends Controller
         }
 
         return $this->render('PeterjmitBlogBundle:Blog:show.html.twig', array(
-            'posts' => $posts
+            'post' => $post
         ));
     }
 }
