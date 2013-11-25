@@ -29,6 +29,12 @@
     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
     ga('create', 'UA-40298804-1', 'peterjmit.com');
     ga('send', 'pageview');
+    setTimeout(function() {
+      window.onscroll = function() {
+        window.onscroll = null;
+        ga('send', 'event', 'scroll', 'read');
+      }
+    }, 5000);
   </script>
 </head>
 
