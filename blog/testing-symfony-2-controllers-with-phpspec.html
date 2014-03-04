@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+
+  <link rel="dns-prefetch" href="//fonts.googleapis.com">
+  <link rel="dns-prefetch" href="//www.google-analytics.com">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Testing Symfony 2 Controllers with PhpSpec :: Peter Mitchell :: Website and application developer</title>
+
+  <meta name="description" content="Peter Mitchell helps build online businesses and is interested in working
+with start-ups, small companies and individuals">
+  <meta name="keywords" content="peterjmit, web development, web applications, web developer, php developer, javascript developer, ecommerce, PHP, BDD, Symfony2">
+  <meta name="author" content="Peter Mitchell">
+  <meta name="email" content="pete@peterjmit.com">
+
+  <link href="/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <style >html.wait {
+	cursor: wait !important;
+	opacity: 0;
+	transition: opacity 0.5s ease;
+}</style>
+
+  <link rel="shortcut icon" href="/favicon.ico">
+
+  <script src="/js/fonts.js"></script>
+</head>
+
+<body>
+
+  <header id="top" role="banner">
+    <div class="block">
+      <a href="/" id="logo">
+        <img src="/img/logo.svg" alt="site logo" title="Peter Mitchell is a web developer">
+        <span>Peter Mitchell</span>
+      </a>
+
+      <nav id="nav" role="navigation">
+        <a href="/blog/">Blog</a>
+        <a href="mailto:pete@peterjmit.com?subject=Hi!">Say hello</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" role="main">
+    <div class="content">
+  <article class="post block">
+    <header>
+      <h1>
+        Testing Symfony 2 Controllers with PhpSpec
+      </h1>
+      <time datetime="Fri Aug 16 2013 00:00:00 GMT-0400 (EDT)">
+        Aug 16th, 2013
+      </time>
+    </header>
+
+    <hr>
+
+    <p>In order to effectively test any class, you have to understand at a basic level
+how the class functions. These examples will give an introduction explain how to
+test a Symfony 2 controller using PhpSpec (but the ideas apply to using any
+testing framework). They also completely abandon the BDD workflow that PhpSpec
+is designed to be used within (this is well documented elsewhere so this
+post will not cover it).</p>
+<p>To follow these examples you will need to install the Symfony 2 standard edition
+with PhpSpec. I have created a <a href="https://github.com/peterjmit/testing-symfony2-controllers-with-phpspec/commits">repository with all the example code</a> and you
+can follow the commits step by step.</p>
+<p>Lets start with a familiar example of a Controller that you may create when
+you are getting started with Symfony 2 and following the examples in the
+documentation.</p>
+<pre class="highlighted"><code class="php"><span class="keyword">namespace</span> Peterjmit\BlogBundle\Controller;
+
+<span class="keyword">use</span> Symfony\Bundle\FrameworkBundle\Controller\Controller;
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogController</span> <span class="keyword">extends</span> <span class="title">Controller</span>
+{</span>
+    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">indexAction</span><span class="params">()</span>
+    {</span>
+        <span class="variable">$repository</span> = <span class="variable">$this</span>-&gt;getDoctrine()
+            -&gt;getManager()
+            -&gt;getRepository(<span class="string">'PeterjmitBlogBundle:Blog'</span>);
+
+        <span class="variable">$posts</span> = <span class="variable">$repository</span>-&gt;findAll();
+
+        <span class="keyword">return</span> <span class="variable">$this</span>-&gt;render(
+            <span class="string">'PeterjmitBlogBundle:Blog:index.html.twig'</span>,
+            <span class="keyword">array</span>(<span class="string">'posts'</span> =&gt; <span class="variable">$posts</span>)
+        );
+    }
+}</code></pre>
+<p>In order to get started we need to create the spec file for our <code>BlogController</code></p>
+<pre class="highlighted"><code class="bash">$ ./bin/phpspec describe Peterjmit/BlogBundle/Controller/BlogController</code></pre>
+<p>Now we can start specifying behaviours for our controller by adding methods to
+our Spec class, and as we already have an <code>indexAction</code> in <code>BlogController</code>, we
+can start trying to describe the behaviour of that action.</p>
+<pre class="highlighted"><code class="php"><span class="comment">// spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php</span>
+
+<span class="comment">// ...</span>
+
+<span class="function"><span class="keyword">function</span> <span class="title">it_should_respond_to_index_action</span><span class="params">()</span>
+{</span>
+    <span class="variable">$this</span>-&gt;indexAction();
+}</code></pre>
+<p>If we try and run that spec, we will be greeted with a fatal PHP error:</p>
+<blockquote>
+<p>Fatal error:  Call to a member function has() on a non-object in
+[...]Symfony/Bundle/FrameworkBundle/Controller/Controller.php on line 198</p>
+</blockquote>
+<p>At this point you probably understand how to write a Symfony controller, but
+exactly how it works may not be clear. To start specifying its behaviour we need
+to understand how to properly isolate it, what its dependencies are, and what
+behaviour it needs to fulfil as part of a Symfony 2 based application.</p>
+<h2 id="what-behaviour-does-symfony-2-require-from-a-controller-">What behaviour does Symfony 2 require from a controller?</h2>
+<p>This question is easy to answer, and it is one of my favourite things about
+the Symfony 2 framework (suggested reading: <a href="http://symfony.com/doc/current/book/controller.html#requests-controller-response-lifecycle">Requests, Controller, Response Lifecycle</a>).
+Because all of the framework components are decoupled, very little happens needs
+to happen within a controller, and this can make it very easy to test.</p>
+<p>At a basic level a controller within Symfony2 is any PHP callable that returns
+an instance of the <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Component/HttpFoundation/Response.php">Symfony2 Response object</a>. In the standard edition a
+controller is usually a method postfixed with <code>Action</code> located within a
+Controller class.</p>
+<p>Based on this information we can develop the initial spec we wrote for
+<code>indexAction</code> a little further:</p>
+<pre class="highlighted"><code class="php"><span class="comment">// spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php</span>
+
+<span class="comment">// ...</span>
+
+<span class="function"><span class="keyword">function</span> <span class="title">it_should_respond_to_index_action</span><span class="params">()</span>
+{</span>
+    <span class="variable">$response</span> = <span class="variable">$this</span>-&gt;indexAction();
+
+    <span class="variable">$response</span>-&gt;shouldHaveType(
+        <span class="string">'Symfony\Component\HttpFoundation\Response'</span>
+    );
+}</code></pre>
+<p>The test will still fail however, because we have not yet worked out a way to
+fulfil the dependencies that our <code>BlogController</code> has so that we don&#39;t get
+any more fatal errors.</p>
+<h2 id="understanding-the-dependencies-of-your-controller">Understanding the dependencies of your controller</h2>
+<p>In order to test our Controller, we need a way of fulfilling the dependencies
+it has at runtime. In PhpSpec the strategy for achieving this involves isolating
+the Subject Under Specification (SUS) so that our specification <em>only</em> deals
+with its behaviour.</p>
+<p>If we revisit the controller that we created at the beginning you will see
+that we have extended the <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/FrameworkBundle/Controller/Controller.php"><code>Symfony\Bundle\FrameworkBundle\Controller\Controller</code></a>.
+This class provides some convenience methods that let you write some common
+controller actions more quickly. However from a testing point of view it means
+we have a bunch of unspecified behaviours that we need to define.</p>
+<h3 id="what-is-a-containeraware-controller-">What is a <code>ContainerAware</code> controller?</h3>
+<p>To put it simply, if your controller is <code>ContainerAware</code> Symfony 2 will make
+sure that the dependency injection container is available in your controller.</p>
+<p>The framework bundle controller we have extended implements <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Component/DependencyInjection/ContainerAwareInterface.php"><code>ContainerAwareInterface</code></a>
+(via the abstract class <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Component/DependencyInjection/ContainerAware.php"><code>ContainerAware</code></a>). When Symfony 2 resolves a
+controller during the <em>Requests, Controller, Response Lifecycle</em>, it will call
+<code>setContainer</code> with an instance of the dependency injection container
+(a class implementing <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Component/DependencyInjection/ContainerInterface.php"><code>ContainerInterface</code></a>) on any controller that
+implements <code>ContainerAwareInterface</code>.</p>
+<p>Therefore we need to recreate this condition in our specification and we can
+do this via PhpSpec&#39;s <code>let</code> method:</p>
+<pre class="highlighted"><code class="php"><span class="comment">// spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php</span>
+
+<span class="comment">// ...</span>
+
+<span class="keyword">use</span> Symfony\Component\DependencyInjection\ContainerInterface;
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogControllerSpec</span> <span class="keyword">extends</span> <span class="title">ObjectBehavior</span>
+{</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">let</span><span class="params">(ContainerInterface <span class="variable">$container</span>)</span>
+    {</span>
+        <span class="variable">$this</span>-&gt;setContainer(<span class="variable">$container</span>);
+    }
+
+    <span class="comment">// ...</span></code></pre>
+<p>If we try and run the specification now, we will no longer see a PHP fatal error
+(yay!), instead PhpSpec will be complaining that an exception has been thrown.
+This is where we can start faking, stubbing, mocking and spying on the behaviour
+of the collaborators that <code>BlogController</code> relies on.</p>
+<h3 id="stubbing-the-interaction-with-doctrine">Stubbing the interaction with Doctrine</h3>
+<p>The first method we use from the framework controller is <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/FrameworkBundle/Controller/Controller.php#L198"><code>getDoctrine</code></a> to
+get repository for our Blog entity. If you take a look at the method you will see
+that it checks the container to see if the doctrine service is registered,
+and returns it if it is.</p>
+<p>In order to get a mock of the repository (and our list of blog posts) we need an
+to understand the collaborators that are involved in retrieving it - here is a list:</p>
+<ul>
+<li><code>Doctrine\Common\Persistence\ManagerRegistry#getManager</code></li>
+<li><code>Doctrine\Common\Persistence\ObjectManager#getRepository</code></li>
+<li><code>Doctrine\Common\Persistence\ObjectRepository#findAll</code></li>
+</ul>
+<p><em>(check out <a href="https://github.com/doctrine/common/tree/master/lib/Doctrine/Common/Persistence">the source for the interfaces</a>, note if you are using custom
+repository methods you will need to use that class in the spec instead of
+<code>ObjectRepository</code> otherwise PhpSpec will complain)</em></p>
+<p>Just as we stubbed the container, we can stub all of these methods, and
+define some more behaviour for <code>indexAction</code>:</p>
+<pre class="highlighted"><code class="php"><span class="comment">// spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php</span>
+
+<span class="comment">// ...</span>
+<span class="keyword">use</span> Doctrine\Common\Persistence\ManagerRegistry;
+<span class="keyword">use</span> Doctrine\Common\Persistence\ObjectManager;
+<span class="keyword">use</span> Doctrine\Common\Persistence\ObjectRepository;
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogControllerSpec</span> <span class="keyword">extends</span> <span class="title">ObjectBehavior</span>
+{</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">let</span><span class="params">(
+        ContainerInterface <span class="variable">$container</span>,
+        ManagerRegistry <span class="variable">$registry</span>,
+        ObjectManager <span class="variable">$manager</span>,
+        ObjectRepository <span class="variable">$repository</span>
+    )</span> {</span>
+        <span class="variable">$container</span>-&gt;has(<span class="string">'doctrine'</span>)-&gt;willReturn(<span class="keyword">true</span>);
+        <span class="variable">$container</span>-&gt;get(<span class="string">'doctrine'</span>)-&gt;willReturn(<span class="variable">$registry</span>);
+
+        <span class="variable">$registry</span>-&gt;getManager()-&gt;willReturn(<span class="variable">$manager</span>);
+
+        <span class="variable">$manager</span>
+            -&gt;getRepository(<span class="string">'PeterjmitBlogBundle:Blog'</span>)
+            -&gt;willReturn(<span class="variable">$repository</span>);
+
+        <span class="comment">// ...</span>
+    }
+
+    <span class="comment">// ...</span>
+
+    <span class="function"><span class="keyword">function</span> <span class="title">it_should_respond_to_index_action</span><span class="params">(
+        ObjectRepository <span class="variable">$repository</span>
+    )</span> {</span>
+        <span class="comment">// findAll could return an array of blog post entities,</span>
+        <span class="comment">// but we are not interested in the return value of findAll</span>
+        <span class="comment">// because it does not influence the behaviour of our</span>
+        <span class="comment">// controller in this example</span>
+        <span class="variable">$repository</span>-&gt;findAll()-&gt;willReturn(<span class="keyword">array</span>());
+
+        <span class="variable">$response</span> = <span class="variable">$this</span>-&gt;indexAction();
+
+        <span class="variable">$response</span>-&gt;shouldHaveType(
+            <span class="string">'Symfony\Component\HttpFoundation\Response'</span>
+        );
+    }
+}</code></pre>
+<h3 id="stubbing-templating">Stubbing templating</h3>
+<p>The final method we use from the framework bundle controller is <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/FrameworkBundle/Controller/Controller.php#L104"><code>render</code></a>.
+Ihis method is a <em>proxy</em> method to the <code>renderResponse</code> method on the <code>templating</code>
+service which in the Symfony 2 standard edition is an instance of
+<a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/FrameworkBundle/Templating/EngineInterface.php"><code>EngineInterface</code></a>.</p>
+<p>When looking at the behavour of <code>renderResponse</code> you will see that it returns
+a <code>Response</code> object which will conveniently fulfil our initial specificiation
+for the behaviour of <code>indexAction</code>.</p>
+<p>The specification for mocking/stubbing templating (and the Response object)
+looks like this:</p>
+<pre class="highlighted"><code class="php"><span class="comment">// spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php</span>
+
+<span class="comment">// ...</span>
+<span class="keyword">use</span> Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+<span class="keyword">use</span> Symfony\Component\HttpFoundation\Response;
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogControllerSpec</span> <span class="keyword">extends</span> <span class="title">ObjectBehavior</span>
+{</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">let</span><span class="params">(
+      // ...
+      EngineInterface <span class="variable">$templating</span>
+    )</span> {</span>
+        <span class="comment">// ...</span>
+        <span class="variable">$container</span>-&gt;get(<span class="string">'templating'</span>)-&gt;willReturn(<span class="variable">$templating</span>);
+        <span class="comment">// ...</span>
+    }
+
+    <span class="comment">// ...</span>
+
+    <span class="function"><span class="keyword">function</span> <span class="title">it_should_respond_to_index_action</span><span class="params">(
+        // ...
+        EngineInterface <span class="variable">$templating</span>,
+        Response <span class="variable">$mockResponse</span>
+    )</span> {</span>
+        <span class="comment">// ...</span>
+        <span class="variable">$templating</span>
+            -&gt;renderResponse(
+                <span class="string">'PeterjmitBlogBundle:Blog:index.html.twig'</span>,
+                <span class="keyword">array</span>(<span class="string">'posts'</span> =&gt; <span class="keyword">array</span>()),
+                <span class="keyword">null</span>
+            )
+            -&gt;willReturn(<span class="variable">$mockResponse</span>)
+        ;
+        <span class="comment">// ...</span>
+    }</code></pre>
+<p>The <a href="https://github.com/peterjmit/testing-symfony2-controllers-with-phpspec/blob/master/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php">final code</a> for our specification can be seen in the github repository I
+mentioned at the beginning. It is important to note that we didn&#39;t have to define
+any routing, write any entities (or mapping) to write a valid controller. This
+is part of the beauty of a BDD approach is that it allows you to focus on one
+cog in the machine at a time.</p>
+<h2 id="this-is-not-the-right-way-trade-">This is not the right way&trade;</h2>
+<p>As with many complex topics in education, you need to un-learn what you were
+taught at the beginning to get to the next level. Hopefully you will realise is
+that writing the above specifications and implementations for every controller
+in your application is rather cumbersome and in violation of a whole bunch
+of good practices.</p>
+<p>Advice for solving some of the problems introduced by the above examples is
+outside of the scope of this post, however I have provided some links below
+to explain some of the bad practices and give you some ideas for solutions.</p>
+<h4 id="suggested-reading">Suggested reading</h4>
+<ul>
+<li><a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Component/HttpFoundation/Response.php">phpspec2: SUS and collaborators</a></li>
+<li><a href="http://techportal.inviqa.com/2013/07/23/php-test-doubles-patterns-with-prophecy/">An explanation for fakes, stubs, mocks and spies</a></li>
+<li><a href="http://williamdurand.fr/2013/07/30/from-stupid-to-solid-code">From STUPID to SOLID Code!</a></li>
+<li><a href="http://richardmiller.co.uk/2011/04/15/symfony2-controller-as-service/">Symfony2: Controller as Service</a></li>
+<li><a href="http://www.whitewashing.de/2013/06/27/extending_symfony2__controller_utilities.html">Extending Symfony2: Controller Utilities</a></li>
+<li><a href="http://iamproblematic.com/2012/03/12/putting-your-symfony2-controllers-on-a-diet-part-2/">Putting your Symfony2 controllers on a diet, part 2</a></li>
+<li><a href="https://github.com/phpspec/Symfony2Extension">A start to writing a Symfony2 extension for PhpSpec</a></li>
+</ul>
+<h2 id="a-couple-of-tips-to-make-this-a-bit-easier">A couple of tips to make this a bit easier</h2>
+<p>When you are writing tests for classes that rely on third party libraries
+it can be very time consuming tracking down all of the interfaces and method
+signatures so that you can mock them. Fortunately there are some tools to help:</p>
+<h4 id="use-fuzzy-search">Use fuzzy search</h4>
+<p>In sublime text (vim and PHPStorm have similar functionality)
+you can hit <code>Ctrl+P</code> to access fuzzy search allowing you to quickly track down
+and inspect classes/interfaces (otherwise there is always github).</p>
+<h4 id="inspecting-service-implementations">Inspecting service implementations</h4>
+<p>The <code>container:debug</code> console command combined with <code>grep</code> is invaluable for
+finding out what class a service is, for example if you want to find out what
+<code>templating</code> is you can run the following command:</p>
+<pre class="highlighted"><code class="bash">$ php app/console container:debug | grep templating</code></pre>
+<hr>
+
+<p>Please get in touch with me on <a href="https://twitter.com/peterjmit">twitter</a> if you
+have any comments, or <a href="https://github.com/peterjmit/peterjmit.com/blob/master/src/documents/blog/testing-symfony-2-controllers-with-phpspec.html.md">fork this blog post</a> and contribute!</p>
+
+
+    <!-- twitter follow button -->
+<a href="https://twitter.com/Peterjmit" class="twitter-follow-button" data-show-count="false">Follow @peterjmit</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+<br>
+
+<!-- twitter share button -->
+<a href="https://twitter.com/share" class="twitter-share-button" data-text="Testing Symfony 2 Controllers with PhpSpec" data-via="Peterjmit" data-dnt="true">Share on twitter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+  </article>
+</div>
+  </main>
+
+  <footer id="bottom" role="contentinfo">
+    <div class="block">
+      <p class="copyright">
+        Peter Mitchell
+        <span class="muted">
+          &ndash; design by <a href="http://www.natalierauh.de/" target="_blank">Natalie Rauh</a>
+        </span>
+      </p>
+
+      <ul class="social-icons">
+  <li title="See my answers on Stackoverflow">
+    <a target="_blank" href="http://stackoverflow.com/users/1041885/pete-mitchell">
+      <i class="icon stackoverflow"></i>
+    </a>
+  </li>
+  <li title="Take a look at my Github projects">
+    <a target="_blank" href="https://github.com/peterjmit">
+      <i class="icon github"></i>
+    </a>
+  </li>
+  <li title="Follow me on Twitter">
+    <a target="_blank" href="https://twitter.com/peterjmit">
+      <i class="icon twitter"></i>
+    </a>
+  </li>
+</ul>
+
+    </div>
+  </footer>
+
+  <script >(function(){
+	/* Did we just livereload? */
+var log = !!(localStorage && console && console.log && true);
+if ( log && localStorage.getItem('/docpad-livereload/reloaded') === 'yes' ) {
+	localStorage.removeItem('/docpad-livereload/reloaded');
+	console.log('LiveReload completed at', new Date())
+}
+
+/* Listen for the regenerated event and perform a reload of the page when the event occurs */
+var listen = function(){
+	var primus = new Primus('/docpad-livereload');
+	primus.on('data', function(data){
+		if ( data && data.message ) {
+			if ( data.message === 'generateBefore' ) {
+				if ( log ) {
+					console.log('LiveReload started at', new Date());
+				}
+				if ( typeof document.getElementsByTagName !== 'undefined' ) {
+	document.getElementsByTagName('html')[0].className += ' wait';
+}
+			}
+			else if ( data.message === 'generateAfter' ) {
+				if ( log ) {
+					localStorage.setItem('/docpad-livereload/reloaded', 'yes');
+				}
+				document.location.reload();
+			}
+		}
+	});
+};
+	/* Inject socket into our page */
+var inject = function(){
+	var t = document.createElement('script');
+	t.type = 'text/javascript';
+	t.async = 'async';
+	t.src = '/primus/primus.js';
+	t.onload = listen;
+	var s = document.getElementsByTagName('script')[0];
+	s.parentNode.insertBefore(t, s);
+};
+	if ( typeof Primus !== 'undefined' ) {
+		listen();
+	} else {
+		inject();
+	}
+})();</script>
+
+  
+
+  <!--
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-40298804-1', 'peterjmit.com');
+    ga('send', 'pageview');
+  </script>
+  -->
+</body>
+</html>

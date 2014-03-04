@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+
+  <link rel="dns-prefetch" href="//fonts.googleapis.com">
+  <link rel="dns-prefetch" href="//www.google-analytics.com">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>A better workflow with Chef &amp; Vagrant :: Peter Mitchell :: Website and application developer</title>
+
+  <meta name="description" content="Peter Mitchell helps build online businesses and is interested in working
+with start-ups, small companies and individuals">
+  <meta name="keywords" content="peterjmit, web development, web applications, web developer, php developer, javascript developer, ecommerce, Chef, Vagrant, Workflow, Devops">
+  <meta name="author" content="Peter Mitchell">
+  <meta name="email" content="pete@peterjmit.com">
+
+  <link href="/css/font.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/css/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  
+
+  <link rel="shortcut icon" href="/favicon.ico">
+
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    ga('create', 'UA-40298804-1', 'peterjmit.com');
+    ga('send', 'pageview');
+    setTimeout(function() {
+      window.onscroll = function() {
+        window.onscroll = null;
+        ga('send', 'event', 'scroll', 'read');
+      }
+    }, 5000);
+  </script>
+</head>
+
+<body>
+
+  <header id="top" role="banner">
+    <div class="block">
+      <a href="/" id="logo">
+        <img src="/img/logo.svg" alt="site logo" title="Peter Mitchell is a web developer">
+        <span>Peter Mitchell</span>
+      </a>
+
+      <nav id="nav" role="navigation">
+        <a href="/blog/">Blog</a>
+        <a href="mailto:pete@peterjmit.com?subject=Hi!">Say hello</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main" role="main">
+    <div class="content">
+  <article class="post block">
+    <header>
+      <h1>
+        A better workflow with Chef &amp; Vagrant
+      </h1>
+      <time datetime="Wed Jun 26 2013 00:00:00 GMT-0400 (EDT)">
+        Jun 26th, 2013
+      </time>
+    </header>
+
+    <hr>
+
+    <p>I have been using the Chef and Vagrant combo for a little under a year now and it
+represented a huge improvement in time, efficiency and management of developing,
+running and deploying projects. The workflow I had arrived at was not perfect
+though and had a few warts that needed removing:</p>
+<ol>
+<li><a href="#veewee">Getting hold of (or creating) base boxes for Vagrant</a></li>
+<li><a href="#simplify-chef">The chef repository can grow to be <em>monolithic</em> and hard to understand</a></li>
+<li><a href="#berkshelf">Downloading and managing cookbooks outside of the Opscode repositories is difficult</a></li>
+</ol>
+<h4 id="tools-for-the-new-workflow">Tools for the new workflow</h4>
+<p>You should already have VirtualBox, Chef and Vagrant installed and Configured.
+You will also need to install a ruby version manager (RVM/rbenv) and the
+following gems: <code>veewee</code>, <code>berkshelf</code> and <code>bundler</code> (optional). Hopefully
+the following will explain the what and why being using these tools. <em>note that
+as of writing <code>veewee</code> requires ruby 1.9.2 and <code>berkshelf</code> requires ruby 1.9.3.</em></p>
+<h2 id="veewee">1. Veewee to the rescue</h2>
+
+<p>To get a box ready to be provisioned by Vagrant, there are a few hoops to jump
+through in terms of setting up software (chef, ssh, nfs, a vagrant user etc.).
+This can all be set up manually, but that is not very repeatable and does not
+feel very <em>chef-y</em>.</p>
+<p>In order to find a base box to build on I used to use <a href="http://www.vagrantbox.es/">www.vagrantbox.es</a> as
+a starting point. Finding a correctly configured box is easier said than done,
+assuming Chef is actually installed on the box, I have often found the VirtualBox
+additions to be out of date which can cause problems. Not to mention I am stuck
+if I cannot find a box for the OS I want to install.</p>
+<p>Fortunately Veewee takes all the pain out of this process, with a couple of commands
+you tell Veewee what OS you want to install, and fulfils all the prerequisites
+necessary for Vagrant (or VMWare, KVM, Parallels for that matter). The instructions
+for Veewee are well documented in the <a href="https://github.com/jedi4ever/veewee">repository</a> and in Phil Sturgeon&#39;s
+<a href="http://philsturgeon.co.uk/blog/2013/05/build-your-own-vagrant-boxes-with-veewee">blog post</a> which originally led me to Veewee.</p>
+<h2 id="simplify-chef">2. Simplify the approach to Chef</h2>
+
+<p>Chef is a powerful tool and that power is provided through a few <em>chef-isms</em>.
+Recipes, attributes, LWRPs, cookbooks, roles, nodes, data bags...this is not
+an exhaustive list but this can steepen the learning curve both for a
+beginner, or an infrequent user of Chef revisiting their installation weeks or
+months later.</p>
+<p><strong>The problem</strong></p>
+<p>I set up my chef repository a while back, and I thought I was doing everything
+as I should, I had some community cookbooks, some Github cookbooks (modified
+as part of my chef-repo), and some custom cookbooks all in the same repository.
+I then had roles named things like &quot;database&quot;, &quot;application&quot; or &quot;cache&quot; and
+it all seemed to fit together nicely. These roles could then be composed to build
+a server to host <em>any</em> application, theoretically keeping things separated and
+re-usable.</p>
+<p>The problem came when it was time to change the software stack slightly.
+Updating cookbooks was hard to keep track of, it creates a lot of noise in the
+git log (so many branches!) making debugging or rolling back changes more
+difficult. My ability to understand and use the tool, and how everything fits
+together was impaired - I needed Chef to capture/represent the idea of an
+application and my usage was not doing that.</p>
+<p><strong>The solution</strong></p>
+<p>The solution almost entirely comes from a <a href="http://www.youtube.com/watch?v=hYt0E84kYUI">talk by Jamie Winsor</a> of Riot
+Games. Riot manage a huge persistent multiplayer gaming infrastructure using
+Chef and have open sourced <a href="https://github.com/riotgames">a lot of their work on Github</a>. It boils down to
+taking best practices that you may already be applying in software development
+and applying them (which you may not be doing) to your infrastructure development.</p>
+<h3 id="abandon-as-many-chef-isms-as-you-can">Abandon as many chef-isms as you can</h3>
+<p>You may be just getting started with Chef, and so we want to abandon as much of
+that list of <em>chef-isms</em> I referred to earlier to make things easier for
+ourselves. The good news is that we can...forget about everything else, all we
+need is a cookbook and some recipes.</p>
+<h3 id="cookbooks-for-applications-recipes-for-components">Cookbooks for applications, recipes for components</h3>
+<p>If you have done any <abbr title="Behaviour Driven Development">BDD</abbr> taking
+an &quot;outside in&quot; approach may be familiar. I like taking this approach because
+I find it makes it easier to communicate often abstract/complicated ideas and can
+lead to more simplistic solutions.</p>
+<p>In this context the &quot;outside&quot; is the common unit you are trying to manage with
+Chef, something that everyone in the team understands - a website, application
+or an API for example. In Chef we can model this basic unit of currency as a
+cookbook.</p>
+<p>The next level &quot;in&quot; are the components that make up an application, for a website
+a basic example would be a database server and an application server. These
+components are represented as recipes.</p>
+<p>By communicating this idea/model to your team, usage of Chef/Vagrant for the team
+becomes as simple as.</p>
+<blockquote>
+<p>To get a local environment for &quot;my-awesome-application&quot; up and running
+include some recipe(s) from &quot;my-awesome-application&quot; cookbook in your vagrant
+file.</p>
+</blockquote>
+<p>Furthermore, fixing issues with or adding extra software packages to an
+application/service becomes very clear.</p>
+<blockquote>
+<p>To add the &quot;curl&quot; package to &quot;my-awesome-application&quot; I can checkout
+the &quot;my-awesome-cookbook&quot; and add a step to the &quot;app server&quot; recipe</p>
+</blockquote>
+<p>At the most simple level and if you are just getting started, most recipes will
+serve as wrappers around existing cookbooks setting defaults or creating options
+for software that tailored to your organisation or that are required by the
+frameworks that you are using. As your understanding and requirements increase
+for the tool you can start delving deeper, creating more generic and re-usable
+cookbooks, Jamie&#39;s talk covers some different patterns for developing
+cookbooks/recipes so if you haven&#39;t already, you should <a href="http://www.youtube.com/watch?v=hYt0E84kYUI">watch it</a>.</p>
+<p>If it isn&#39;t already clear, it is important that your application cookbooks stay
+isolated for them to be useful (ideally in their own version controlled
+repository, separated from the Chef repository you may be used to). Cookbooks are
+powerful in that Chef provides a metadata file for defining dependencies and
+their versions, however the default Chef setup means that these dependencies
+become part of your repository and this is not ideal, this brings me to a
+solution for problem 3.</p>
+<h2 id="berkshelf">3. Put your Cookbooks on the Berkshelf</h2>
+
+<p>The way knife manages dependencies is unlike any other tool I use from day to
+day (npm, gem, composer...). I am not a big fan of re-inventing the wheel,
+or doing work a community of people have already contributed to, I have been
+spoilt with the ease of which I can import 3rd party libraries in other languages
+while keeping them isolated from my code base. If you want to pull in cookbooks
+from Github with knife you could use the Github plugin, but that has its own
+issues and hasn&#39;t seen a commit in 2 years (as of writing) and it is not free
+of issues.</p>
+<p>It is this issue that prompted me to look for a better way, and <a href="http://berkshelf.com/">Berkshelf</a>
+seems to be the answer. Berkshelf provides the solution to writing a cookbook
+in isolation, and lets you pull in 3rd party cookbooks from <em>any</em> location
+whether that be Opscode, a git repository or even your local filesystem. When you
+pull in those dependencies, they stay separate from your cookbook just as with
+ruby gems, or npm.</p>
+<h3 id="a-basic-example-of-the-workflow-in-action">A basic example of the workflow in action</h3>
+<p>At the beginning I provided a list of tools for the new workflow, I am going
+to presuppose the following</p>
+<ul>
+<li>You are using Chef server, and have knife configured with your relevant keys</li>
+<li>You have set up/downloaded a box for Vagrant that is ready to provision (this example is going to be specific to Debian Wheezy)</li>
+<li>You have provisioned a Vagrant box via Chef server before (or know how to)</li>
+<li>You have the <code>berkshelf</code> gem installed and ready to use</li>
+</ul>
+<p>At this point we are going to abandon the Chef repository that is described
+in the official Chef documentation, and start from fresh. We are going to provision
+a simple nginx webserver on Debian Wheezy using the latest version instead of
+what is available in the repositories.</p>
+<p>Create the &quot;my-static-blog&quot; cookbook (and get rid of the folders we aren&#39;t
+going to use)</p>
+<pre class="highlighted"><code class="bash">$ cd path/to/save/cookbooks
+$ berks cookbook my-static-blog --license=mit
+$ cd my-static-blog; rm -rf definitions files libraries providers resources templates</code></pre>
+<p>Add the Opscode nginx cookbook as a dependency in <code>metadata.rb</code></p>
+<pre class="highlighted"><code class="ruby"><span class="comment"># metadata.rb</span>
+
+depends <span class="string">'nginx'</span>, <span class="string">'&gt;= 1.7.0'</span></code></pre>
+<p>As of writing the current version of nginx on Debian Wheezy is the 1.2.<em> branch,
+because we like to stay cutting edge I want to get the 1.4.</em> branch and
+fortunately <a href="http://www.dotdeb.org/">dotdeb</a> provides a repository for newer versions on debian. There
+is an opscode community repository for dotdeb, but it doensn&#39;t support Wheezy
+so we have to grab a <a href="https://github.com/peterjmit/chef-dotdeb">custom one</a>. So we add dotdeb to <code>metadata.rb</code> as before</p>
+<pre class="highlighted"><code class="ruby"><span class="comment"># metadata.rb</span>
+
+<span class="comment"># Important, as this cookbook is only compatible with Debian Wheezy because of dotdeb</span>
+supports <span class="string">'debian'</span>, <span class="string">'&gt;= 7.0'</span>
+
+depends <span class="string">'nginx'</span>,  <span class="string">'&gt;= 1.7.0'</span>
+depends <span class="string">'dotdeb'</span>, <span class="string">'&gt;= 0.1.2'</span></code></pre>
+<p>To grab the dotdeb cookbook from Github we need to add a line to <code>Berksfile</code>,
+<code>site :opscode</code> and <code>metadata</code> should already be there, this tells Berkshelf
+to resolve dependencies in <code>metadata.rb</code> from the Opscode repositories by default</p>
+<pre class="highlighted"><code class="haskell"># <span class="type">Berksfile</span>
+
+<span class="title">site</span> :opscode
+
+<span class="title">metadata</span>
+
+<span class="title">cookbook</span> <span class="string">"dotdeb"</span>, github: <span class="string">"peterjmit/chef-dotdeb"</span></code></pre>
+<p>Next you can create a recipe for the web server to tie this all together and
+configure nginx</p>
+<pre class="highlighted"><code class="ruby"><span class="comment"># recipes/web_server.rb</span>
+
+<span class="comment"># You configure some the nginx attributes in the recipe</span>
+<span class="comment"># for example, turning gzip off</span>
+node.set[<span class="symbol">:nginx</span>][<span class="symbol">:gzip</span>] = <span class="string">'off'</span>
+
+<span class="comment"># Include the default recipes to get nginx installed via dotdeb</span>
+include_recipe <span class="string">'dotdeb'</span>
+include_recipe <span class="string">'nginx'</span></code></pre>
+<p>If suitable for your application, you can add your components
+to <code>recipes/default.rb</code> to allow installation of the full application via</p>
+<pre class="highlighted"><code class="ruby"><span class="comment"># recipes/default.rb</span>
+
+include_recipe <span class="string">'my-static-blog::web_server'</span></code></pre>
+<p>Now you are ready to roll, if you run <code>berks install</code> you will install
+the cookbooks you have specified (and their dependencies) to
+<code>~/.berkshelf/cookbooks/</code>. To get your cookbooks on the chef server use
+<code>berks upload</code>. Once you have have done that you are ready to provision
+your Vagrant box, it is as simple as:</p>
+<pre class="highlighted"><code class="ruby"><span class="comment"># Vagrantfile</span>
+
+config.vm.provision <span class="symbol">:chef_client</span> <span class="keyword">do</span> |chef|
+  <span class="comment"># chef server config</span>
+
+  chef.add_recipe <span class="string">'my-static-blog'</span>
+<span class="keyword">end</span></code></pre>
+<p>With any luck you will be able to run <code>vagrant up</code> and voilà, your nginx webserver
+has been provisioned. Most applications are a bit more complex than that, but
+by adding a scripting language recipe to <code>web_server</code> recipe and perhaps
+introducing a <code>database_server</code> recipe you can see how you can build on your
+application cookbooks.</p>
+<h4 id="added-bonus">Added bonus</h4>
+<p>There are a few different ways of doing things in Chef, and things change from
+version to version, fortunately there is a gem called <code>foodcritic</code> that will lint
+your cookbooks for you and report errors, deprecated syntax etc. I highly
+recommend installing it to catch any errors before trying to provision your
+cookbooks.</p>
+<p>Please <a href="https://twitter.com/peterjmit">give me a shout on twitter</a> if you have
+any comments, contributions or corrections for this blog post, all constructive
+feedback is welcome.</p>
+<p><em>Many thanks to Riot Games, Jamie Winsor, and Opscode for open sourcing great
+tools and making high quality learning materials available online</em></p>
+
+
+    <!-- twitter follow button -->
+<a href="https://twitter.com/Peterjmit" class="twitter-follow-button" data-show-count="false">Follow @peterjmit</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+<br>
+
+<!-- twitter share button -->
+<a href="https://twitter.com/share" class="twitter-share-button" data-text="A better workflow with Chef & Vagrant" data-via="Peterjmit" data-dnt="true">Share on twitter</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
+
+
+  </article>
+</div>
+  </main>
+
+  <footer id="bottom" role="contentinfo">
+    <div class="block">
+      <p class="copyright">
+        Peter Mitchell
+        <span class="muted">
+          &ndash; design by <a href="http://www.natalierauh.de/" target="_blank">Natalie Rauh</a>
+        </span>
+      </p>
+
+      <ul class="social-icons">
+  <li title="See my answers on Stackoverflow">
+    <a target="_blank" href="http://stackoverflow.com/users/1041885/pete-mitchell">
+      <i class="icon stackoverflow"></i>
+    </a>
+  </li>
+  <li title="Take a look at my Github projects">
+    <a target="_blank" href="https://github.com/peterjmit">
+      <i class="icon github"></i>
+    </a>
+  </li>
+  <li title="Follow me on Twitter">
+    <a target="_blank" href="https://twitter.com/peterjmit">
+      <i class="icon twitter"></i>
+    </a>
+  </li>
+</ul>
+
+    </div>
+  </footer>
+
+  
+
+  
+</body>
+</html>

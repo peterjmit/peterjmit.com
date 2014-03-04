@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title><![CDATA[Peter Mitchell :: Website and application developer]]></title>
+        <description><![CDATA[Peter Mitchell helps build online businesses and is interested in working
+with start-ups, small companies and individuals]]></description>
+        <link>http://peterjmit.com</link>
+        <generator>RSS for Node</generator>
+        <lastBuildDate>Tue, 04 Mar 2014 02:00:33 GMT</lastBuildDate>
+        <atom:link href="http://peterjmit.com/blog/rss.xml" rel="self" type="application/rss+xml"/>
+        <author><![CDATA[Peter Mitchell]]></author>
+        <pubDate>Tue, 04 Mar 2014 02:00:31 GMT</pubDate>
+        <item>
+            <title><![CDATA[Refactoring a Symfony 2 Controller with PhpSpec]]></title>
+            <description><![CDATA[<p>This is the second post in a series that looks at working with PhpSpec and Symfony 2.
+In the <a href="/blog/getting-started-with-phpspec-and-symfony-2.html">first post</a> we saw how it was difficult to manage (and mock) all
+the dependencies that come with a controller that extends the FrameworkBundle
+Controller (you can see all the <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2">code</a> and <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commits/master">commits</a> for these posts on
+<a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2">github</a>).</p>
+<pre class="highlighted"><code class="php"><span class="keyword">namespace</span> Peterjmit\BlogBundle\Controller;
+
+<span class="keyword">use</span> Symfony\Bundle\FrameworkBundle\Controller\Controller;
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogController</span> <span class="keyword">extends</span> <span class="title">Controller</span>
+{</span>
+    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">indexAction</span><span class="params">()</span>
+    {</span>
+        <span class="variable">$entityManager</span> = <span class="variable">$this</span>-&gt;getDoctrine()-&gt;getManager();
+        <span class="variable">$posts</span> = <span class="variable">$entityManager</span>-&gt;getRepository(<span class="string">'PeterjmitBlogBundle:Blog'</span>)-&gt;findAll();
+
+        <span class="keyword">return</span> <span class="variable">$this</span>-&gt;render(<span class="string">'PeterjmitBlogBundle:Blog:index.html.twig'</span>, <span class="keyword">array</span>(
+            <span class="string">'posts'</span> =&gt; <span class="variable">$posts</span>
+        ));
+    }
+
+    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">showAction</span><span class="params">(<span class="variable">$id</span>)</span>
+    {</span>
+        <span class="variable">$entityManager</span> = <span class="variable">$this</span>-&gt;getDoctrine()-&gt;getManager();
+        <span class="variable">$post</span> = <span class="variable">$entityManager</span>-&gt;getRepository(<span class="string">'PeterjmitBlogBundle:Blog'</span>)-&gt;find(<span class="variable">$id</span>);
+
+        <span class="keyword">if</span> (!<span class="variable">$post</span>) {
+            <span class="keyword">throw</span> <span class="variable">$this</span>-&gt;createNotFoundException(sprintf(<span class="string">'Blog post %s was not found'</span>, <span class="variable">$id</span>));
+        }
+
+        <span class="keyword">return</span> <span class="variable">$this</span>-&gt;render(<span class="string">'PeterjmitBlogBundle:Blog:show.html.twig'</span>, <span class="keyword">array</span>(
+            <span class="string">'post'</span> =&gt; <span class="variable">$post</span>
+        ));
+    }
+}</code></pre>
+<h2 id="blogcontroller-knows-too-much">BlogController knows too much</h2>
+<p>Since the previous post, I have added <code>showAction</code> to my controller, but I have
+not specced it because I know that I the mocks are going to be annoying to write,
+and I can see that I have duplicated some code from <code>indexAction</code>.</p>
+<p>This is a good indicator for the need to refactor - in both the spec, and the
+controller. In order to decide how to proceed we need to identify what the
+behaviour of the controller should be, versus what it currently knows.</p>
+<p>So we know that in our controller is called during a request, and should
+return a response object. We also want to show a list of, or a single blog post
+(depending on the action called).</p>
+<p>However we can see that our controller contains more behaviour than that, it knows
+how to:</p>
+<ol>
+<li>Get the templating and doctrine services from the container</li>
+<li>Get a &quot;manager&quot; from the doctrine service</li>
+<li>Get a named repository from the &quot;manager&quot;</li>
+<li>Find blog post objects via the repository</li>
+<li>Render a named template with the blog posts and return the result</li>
+</ol>
+<p>Reviewing that list, only numbers 4 and 5 really seem to fall in line with
+our objective, so our goal will be to remove behaviours 1-3 from our controller
+<sup>1</sup>.</p>
+<h2 id="let-blogcontroller-focus-on-responding-to-a-request">Let BlogController focus on responding to a request</h2>
+<p>Having the container is convenient when we aren&#39;t writing tests, but as soon as we
+start having to mock the container, our specs can get a lot less fun to write.
+Therefore we are going to lose our dependency on
+<code>Symfony\Bundle\FrameworkBundle\Controller\Controller</code>. To fix our failing tests
+we can construct our controller with templating and doctrine instead as shown
+in <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commit/3d5de3432698af520eb30c915e278d39bf53093a">this commit</a>.</p>
+<p>That commit however does not go far enough, so lets <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commit/4a87e1d447c106e479b335a0a95c81d4feddfefa">get rid of doctrine</a> too.
+We do this by introducing the repository <code>BlogRepository</code> directly, providing
+the controller with the blog posts that it needs.</p>
+<p><em>edit: after some feedback I simplified the introduction of <code>BlogManagerInterface</code>
+by switching it to directly injecting the repository <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commit/d930a806641a10706c2ed2d61219de660a8e93bb">in this commit</a></em></p>
+<pre class="highlighted"><code class="php"><span class="comment">// ...</span>
+<span class="keyword">use</span> Peterjmit\BlogBundle\Doctrine\BlogRepository;
+<span class="keyword">use</span> Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogController</span>
+{</span>
+    <span class="keyword">private</span> <span class="variable">$repository</span>;
+    <span class="keyword">private</span> <span class="variable">$templating</span>;
+
+    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">__construct</span><span class="params">(BlogRepository <span class="variable">$repository</span>, EngineInterface <span class="variable">$templating</span>)</span>
+    {</span>
+        <span class="variable">$this</span>-&gt;repository = <span class="variable">$repository</span>;
+        <span class="variable">$this</span>-&gt;templating = <span class="variable">$templating</span>;
+    }
+
+    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">indexAction</span><span class="params">()</span>
+    {</span>
+        <span class="variable">$posts</span> = <span class="variable">$this</span>-&gt;repository-&gt;findAll();
+
+        <span class="keyword">return</span> <span class="variable">$this</span>-&gt;templating-&gt;renderResponse(<span class="string">'PeterjmitBlogBundle:Blog:index.html.twig'</span>, <span class="keyword">array</span>(
+            <span class="string">'posts'</span> =&gt; <span class="variable">$posts</span>
+        ));
+    }
+
+    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">showAction</span><span class="params">(<span class="variable">$id</span>)</span>
+    {</span>
+        <span class="variable">$post</span> = <span class="variable">$this</span>-&gt;repository-&gt;find(<span class="variable">$id</span>);
+
+        <span class="comment">// ...</span>
+
+        <span class="keyword">return</span> <span class="variable">$this</span>-&gt;templating-&gt;renderResponse(<span class="string">'PeterjmitBlogBundle:Blog:show.html.twig'</span>, <span class="keyword">array</span>(
+            <span class="string">'post'</span> =&gt; <span class="variable">$post</span>
+        ));
+    }
+}</code></pre>
+<p>By now our spec is looking a lot less <em>difficult</em> to work with, so we can introduce
+<a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/d930a806641a10706c2ed2d61219de660a8e93bb/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php#L47">some</a> <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/d930a806641a10706c2ed2d61219de660a8e93bb/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php#L65">examples</a> for <code>showAction</code></p>
+<pre class="highlighted"><code class="php"><span class="comment">// ...</span>
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogControllerSpec</span> <span class="keyword">extends</span> <span class="title">ObjectBehavior</span>
+{</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">let</span><span class="params">(
+        BlogRepository <span class="variable">$repository</span>,
+        EngineInterface <span class="variable">$templating</span>
+    )</span> {</span>
+        <span class="variable">$this</span>-&gt;beConstructedWith(<span class="variable">$repository</span>, <span class="variable">$templating</span>);
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">it_is_initializable</span><span class="params">()</span>
+    {</span>
+        <span class="variable">$this</span>-&gt;shouldHaveType(<span class="string">'Peterjmit\BlogBundle\Controller\BlogController'</span>);
+    }
+
+    <span class="function"><span class="keyword">function</span> <span class="title">it_should_respond_to_index_action</span><span class="params">(
+        BlogRepository <span class="variable">$repository</span>,
+        EngineInterface <span class="variable">$templating</span>,
+        Response <span class="variable">$mockResponse</span>
+    )</span> {</span>
+        <span class="variable">$repository</span>-&gt;findAll()-&gt;willReturn(<span class="keyword">array</span>(<span class="string">'An array'</span>, <span class="string">'of blog'</span>, <span class="string">'posts!'</span>));
+
+        <span class="variable">$templating</span>
+            -&gt;renderResponse(
+                <span class="string">'PeterjmitBlogBundle:Blog:index.html.twig'</span>,
+                <span class="keyword">array</span>(<span class="string">'posts'</span> =&gt; <span class="keyword">array</span>(<span class="string">'An array'</span>, <span class="string">'of blog'</span>, <span class="string">'posts!'</span>))
+            )
+            -&gt;willReturn(<span class="variable">$mockResponse</span>)
+        ;
+
+        <span class="variable">$response</span> = <span class="variable">$this</span>-&gt;indexAction();
+
+        <span class="variable">$response</span>-&gt;shouldHaveType(<span class="string">'Symfony\Component\HttpFoundation\Response'</span>);
+    }
+}</code></pre>
+<p>Check out the full <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/d930a806641a10706c2ed2d61219de660a8e93bb/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php">specification</a> and <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/d930a806641a10706c2ed2d61219de660a8e93bb/src/Peterjmit/BlogBundle/Controller/BlogController.php">controller</a> after this round of
+refactoring.</p>
+<p>The behaviour of our controller is now more tightly defined and our logic for
+fetching blog posts is now re-usable in other areas of the application. While
+some would argue this approach is a lot more verbose, we have gained increased
+testability, code re-use and we have gone some way to decoupling our Controller
+from Symfony 2.</p>
+<p>If you hadn&#39;t already realised, in order for our controller to work within Symfony
+we will have to <a href="http://symfony.com/doc/current/cookbook/controller/service.html">define it as a service</a> and this should hopefully
+demonstrate some of the advantages (in terms of maintainability &amp; testability)
+of doing so.</p>
+<p>This is not the only possible approach to making controllers within Symfony
+more testable and arguably it is one of the more verbose, you can also look at
+the following for removing logic from your controllers:</p>
+<ul>
+<li><a href="http://symfony.com/doc/current/bundles/SensioFrameworkExtraBundle/index.html">Annotations provided by SensioFrameworkExtraBundle</a></li>
+<li><a href="http://whitewashing.de/2013/02/19/extending_symfony2__paramconverter.html">Parameter converters</a></li>
+<li><a href="http://www.whitewashing.de/2013/06/27/extending_symfony2__controller_utilities.html">Controller utility service</a></li>
+</ul>
+<h4 id="see-also">See also</h4>
+<ul>
+<li><a href="http://www.slideshare.net/marcello.duarte/emergent-design-with-phpspec">Emergent design with PhpSpec</a></li>
+</ul>
+<p><br></p>
+<p><small></p>
+<ol>
+<li>This problem is formalised by the <a href="http://en.wikipedia.org/wiki/Law_of_Demeter">Law of Demeter</a> and this principal is
+very useful for identifying targets for refactoring/simplification of your code
+</small></li>
+</ol>
+]]></description>
+            <link>http://peterjmit.com/blog/refactoring-a-symfony-2-controller-with-phpspec.html</link>
+            <guid isPermaLink="true">
+                http://peterjmit.com/blog/refactoring-a-symfony-2-controller-with-phpspec.html            </guid>
+            <dc:creator><![CDATA[Peter Mitchell]]></dc:creator>
+            <pubDate>Wed, 04 Sep 2013 04:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Getting started with PhpSpec and Symfony 2]]></title>
+            <description><![CDATA[<p>This is the first post in a series of posts that will take you through a step by
+step guide to getting started with PhpSpec and Symfony 2. If you want to skip
+straight to a <em>better</em> approach for testing controllers check out my <a href="/blog/refactoring-a-symfony-2-controller-with-phpspec.html">second post</a>
+in this series.</p>
+<ul>
+<li>Post 2: <a href="/blog/refactoring-a-symfony-2-controller-with-phpspec.html">Refactoring a Symfony 2 Controller with PhpSpec</a></li>
+</ul>
+<p>This first post is going to look at how a controller works within Symfony 2 and
+how we might begin to start writing specifications for one (as such the following
+examples should not be used in practice). Subsequent posts will refactor these
+examples incorporating some techniques for better application structure.</p>
+<p>To follow these examples you will need to install the Symfony 2 standard edition
+with PhpSpec. I have created a <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commits">repository with all the example code</a> and you
+can follow the commits step by step.</p>
+<p>Lets start with a familiar example of a Controller that you may create when
+you are getting started with Symfony 2 and following the examples in the
+documentation.</p>
+<pre class="highlighted"><code class="php"><span class="keyword">namespace</span> Peterjmit\BlogBundle\Controller;
+
+<span class="keyword">use</span> Symfony\Bundle\FrameworkBundle\Controller\Controller;
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogController</span> <span class="keyword">extends</span> <span class="title">Controller</span>
+{</span>
+    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">indexAction</span><span class="params">()</span>
+    {</span>
+        <span class="variable">$repository</span> = <span class="variable">$this</span>-&gt;getDoctrine()
+            -&gt;getManager()
+            -&gt;getRepository(<span class="string">'PeterjmitBlogBundle:Blog'</span>);
+
+        <span class="variable">$posts</span> = <span class="variable">$repository</span>-&gt;findAll();
+
+        <span class="keyword">return</span> <span class="variable">$this</span>-&gt;render(
+            <span class="string">'PeterjmitBlogBundle:Blog:index.html.twig'</span>,
+            <span class="keyword">array</span>(<span class="string">'posts'</span> =&gt; <span class="variable">$posts</span>)
+        );
+    }
+}</code></pre>
+<p>Using PhpSpec we can create a spec file for our <code>BlogController</code></p>
+<pre class="highlighted"><code class="bash">$ ./bin/phpspec describe Peterjmit/BlogBundle/Controller/BlogController</code></pre>
+<p>The next step is to start specifying behaviours for our controller by adding
+methods to our Spec class, and as we already have an <code>indexAction</code> in
+<code>BlogController</code>, we can start trying to describe the behaviour of that action.</p>
+<pre class="highlighted"><code class="php"><span class="comment">// spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php</span>
+
+<span class="comment">// ...</span>
+
+<span class="function"><span class="keyword">function</span> <span class="title">it_should_respond_to_index_action</span><span class="params">()</span>
+{</span>
+    <span class="variable">$this</span>-&gt;indexAction();
+}</code></pre>
+<p>If we try and run that spec, we will be greeted with a fatal PHP error:</p>
+<blockquote>
+<p>Fatal error:  Call to a member function has() on a non-object in
+[...]Symfony/Bundle/FrameworkBundle/Controller/Controller.php on line 198</p>
+</blockquote>
+<p>At this point you probably understand how to write a Symfony controller, but
+exactly how it works may not be clear. To start specifying its behaviour we need
+to understand how to properly isolate it, what its dependencies are, and what
+behaviour it needs to fulfil as part of a Symfony 2 based application.</p>
+<h2 id="what-behaviour-does-symfony-2-require-from-a-controller-">What behaviour does Symfony 2 require from a controller?</h2>
+<p>This question is easy to answer, and it is one of my favourite things about
+the Symfony 2 framework (suggested reading: <a href="http://symfony.com/doc/current/book/controller.html#requests-controller-response-lifecycle">Requests, Controller, Response Lifecycle</a>).
+Because all of the framework components are decoupled, very little happens needs
+to happen within a controller, and this can make it very easy to test.</p>
+<p>At a basic level a controller within Symfony2 is any PHP callable that returns
+an instance of the <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Component/HttpFoundation/Response.php">Symfony2 Response object</a>. In the standard edition a
+controller is usually a method postfixed with <code>Action</code> located within a
+Controller class.</p>
+<p>Based on this information we can develop the initial spec we wrote for
+<code>indexAction</code> a little further:</p>
+<pre class="highlighted"><code class="php"><span class="comment">// spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php</span>
+
+<span class="comment">// ...</span>
+
+<span class="function"><span class="keyword">function</span> <span class="title">it_should_respond_to_index_action</span><span class="params">()</span>
+{</span>
+    <span class="variable">$response</span> = <span class="variable">$this</span>-&gt;indexAction();
+
+    <span class="variable">$response</span>-&gt;shouldHaveType(
+        <span class="string">'Symfony\Component\HttpFoundation\Response'</span>
+    );
+}</code></pre>
+<p>The test will still fail however, because we have not yet worked out a way to
+fulfil the dependencies that our <code>BlogController</code> has so that we don&#39;t get
+any more fatal errors.</p>
+<h2 id="understanding-the-dependencies-of-your-controller">Understanding the dependencies of your controller</h2>
+<p>In order to test our Controller, we need a way of fulfilling the dependencies
+it has at runtime. In PhpSpec the strategy for achieving this involves isolating
+the Subject Under Specification (SUS) so that our specification <em>only</em> deals
+with its behaviour.</p>
+<p>If we revisit the controller that we created at the beginning you will see
+that we have extended the <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/FrameworkBundle/Controller/Controller.php"><code>Symfony\Bundle\FrameworkBundle\Controller\Controller</code></a>.
+This class provides some convenience methods that let you write some common
+controller actions more quickly. However from a testing point of view it means
+we have a bunch of unspecified behaviours that we need to define.</p>
+<h3 id="what-is-a-containeraware-controller-">What is a <code>ContainerAware</code> controller?</h3>
+<p>To put it simply, if your controller is <code>ContainerAware</code> Symfony 2 will make
+sure that the dependency injection container is available in your controller.</p>
+<p>The framework bundle controller we have extended implements <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Component/DependencyInjection/ContainerAwareInterface.php"><code>ContainerAwareInterface</code></a>
+(via the abstract class <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Component/DependencyInjection/ContainerAware.php"><code>ContainerAware</code></a>). When Symfony 2 resolves a
+controller during the <em>Requests, Controller, Response Lifecycle</em>, it will call
+<code>setContainer</code> with an instance of the dependency injection container
+(a class implementing <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Component/DependencyInjection/ContainerInterface.php"><code>ContainerInterface</code></a>) on any controller that
+implements <code>ContainerAwareInterface</code>.</p>
+<p>Therefore we need to recreate this condition in our specification and we can
+do this via PhpSpec&#39;s <code>let</code> method:</p>
+<pre class="highlighted"><code class="php"><span class="comment">// spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php</span>
+
+<span class="comment">// ...</span>
+
+<span class="keyword">use</span> Symfony\Component\DependencyInjection\ContainerInterface;
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogControllerSpec</span> <span class="keyword">extends</span> <span class="title">ObjectBehavior</span>
+{</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">let</span><span class="params">(ContainerInterface <span class="variable">$container</span>)</span>
+    {</span>
+        <span class="variable">$this</span>-&gt;setContainer(<span class="variable">$container</span>);
+    }
+
+    <span class="comment">// ...</span></code></pre>
+<p>If we try and run the specification now, we will no longer see a PHP fatal error
+(yay!), instead PhpSpec will be complaining that an exception has been thrown.
+This is where we can start faking, stubbing, mocking and spying on the behaviour
+of the collaborators that <code>BlogController</code> relies on.</p>
+<h3 id="stubbing-the-interaction-with-doctrine">Stubbing the interaction with Doctrine</h3>
+<p>The first method we use from the framework controller is <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/FrameworkBundle/Controller/Controller.php#L198"><code>getDoctrine</code></a> to
+get repository for our Blog entity. If you take a look at the method you will see
+that it checks the container to see if the doctrine service is registered,
+and returns it if it is.</p>
+<p>In order to mock the repository (and get a list of blog posts) we need
+to understand the collaborators that are involved in retrieving it from the
+doctrine service, here is a list:</p>
+<ul>
+<li><code>Doctrine\Common\Persistence\ManagerRegistry#getManager</code></li>
+<li><code>Doctrine\Common\Persistence\ObjectManager#getRepository</code></li>
+<li><code>Doctrine\Common\Persistence\ObjectRepository#findAll</code></li>
+</ul>
+<p><em>(check out <a href="https://github.com/doctrine/common/tree/master/lib/Doctrine/Common/Persistence">the source for the interfaces</a>, note if you are using custom
+repository methods you will need to use that class in the spec instead of
+<code>ObjectRepository</code> otherwise PhpSpec will complain)</em></p>
+<p>Just as we stubbed the container, we can stub all of these methods, and
+define some more behaviour for <code>indexAction</code>:</p>
+<pre class="highlighted"><code class="php"><span class="comment">// spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php</span>
+
+<span class="comment">// ...</span>
+<span class="keyword">use</span> Doctrine\Common\Persistence\ManagerRegistry;
+<span class="keyword">use</span> Doctrine\Common\Persistence\ObjectManager;
+<span class="keyword">use</span> Doctrine\Common\Persistence\ObjectRepository;
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogControllerSpec</span> <span class="keyword">extends</span> <span class="title">ObjectBehavior</span>
+{</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">let</span><span class="params">(
+        ContainerInterface <span class="variable">$container</span>,
+        ManagerRegistry <span class="variable">$registry</span>,
+        ObjectManager <span class="variable">$manager</span>,
+        ObjectRepository <span class="variable">$repository</span>
+    )</span> {</span>
+        <span class="variable">$container</span>-&gt;has(<span class="string">'doctrine'</span>)-&gt;willReturn(<span class="keyword">true</span>);
+        <span class="variable">$container</span>-&gt;get(<span class="string">'doctrine'</span>)-&gt;willReturn(<span class="variable">$registry</span>);
+
+        <span class="variable">$registry</span>-&gt;getManager()-&gt;willReturn(<span class="variable">$manager</span>);
+
+        <span class="variable">$manager</span>
+            -&gt;getRepository(<span class="string">'PeterjmitBlogBundle:Blog'</span>)
+            -&gt;willReturn(<span class="variable">$repository</span>);
+
+        <span class="comment">// ...</span>
+    }
+
+    <span class="comment">// ...</span>
+
+    <span class="function"><span class="keyword">function</span> <span class="title">it_should_respond_to_index_action</span><span class="params">(
+        ObjectRepository <span class="variable">$repository</span>
+    )</span> {</span>
+        <span class="comment">// findAll could return an array of blog post entities,</span>
+        <span class="comment">// but we are not interested in the return value of findAll</span>
+        <span class="comment">// because it does not influence the behaviour of our</span>
+        <span class="comment">// controller in this example</span>
+        <span class="variable">$repository</span>-&gt;findAll()-&gt;willReturn(<span class="keyword">array</span>());
+
+        <span class="variable">$response</span> = <span class="variable">$this</span>-&gt;indexAction();
+
+        <span class="variable">$response</span>-&gt;shouldHaveType(
+            <span class="string">'Symfony\Component\HttpFoundation\Response'</span>
+        );
+    }
+}</code></pre>
+<p>At this point it is worth noting that it was somewhat of a hassle to set up all
+the collaborators involved for getting a repository. When something is difficult
+or <em>inconvenient</em> to test it is an indicator that you need to look at a different
+way of achieving the behaviour.</p>
+<p>In this example our controller <em>knows</em> too much about the implementation of
+retrieving blog posts, and refactoring should aim to reduce the number of
+collaborators - my next blog post will discuss how we can do this in a Symfony
+application.</p>
+<h3 id="stubbing-templating">Stubbing templating</h3>
+<p>The final method we use from the framework bundle controller is <a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/FrameworkBundle/Controller/Controller.php#L104"><code>render</code></a>.
+This method is a <em>proxy</em> method to the <code>renderResponse</code> method on the <code>templating</code>
+service which in the Symfony 2 standard edition is an instance of
+<a href="https://github.com/symfony/symfony/blob/master/src/Symfony/Bundle/FrameworkBundle/Templating/EngineInterface.php"><code>EngineInterface</code></a>.</p>
+<p>When looking at the behavour of <code>renderResponse</code> you will see that it returns
+a <code>Response</code> object which will conveniently fulfil our initial specificiation
+for the behaviour of <code>indexAction</code>.</p>
+<p>The specification for mocking/stubbing templating (and the Response object)
+looks like this:</p>
+<pre class="highlighted"><code class="php"><span class="comment">// spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php</span>
+
+<span class="comment">// ...</span>
+<span class="keyword">use</span> Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+<span class="keyword">use</span> Symfony\Component\HttpFoundation\Response;
+
+<span class="class"><span class="keyword">class</span> <span class="title">BlogControllerSpec</span> <span class="keyword">extends</span> <span class="title">ObjectBehavior</span>
+{</span>
+    <span class="function"><span class="keyword">function</span> <span class="title">let</span><span class="params">(
+      // ...
+      EngineInterface <span class="variable">$templating</span>
+    )</span> {</span>
+        <span class="comment">// ...</span>
+        <span class="variable">$container</span>-&gt;get(<span class="string">'templating'</span>)-&gt;willReturn(<span class="variable">$templating</span>);
+        <span class="comment">// ...</span>
+    }
+
+    <span class="comment">// ...</span>
+
+    <span class="function"><span class="keyword">function</span> <span class="title">it_should_respond_to_index_action</span><span class="params">(
+        // ...
+        EngineInterface <span class="variable">$templating</span>,
+        Response <span class="variable">$mockResponse</span>
+    )</span> {</span>
+        <span class="comment">// ...</span>
+        <span class="variable">$templating</span>
+            -&gt;renderResponse(
+                <span class="string">'PeterjmitBlogBundle:Blog:index.html.twig'</span>,
+                <span class="keyword">array</span>(<span class="string">'posts'</span> =&gt; <span class="keyword">array</span>()),
+                <span class="keyword">null</span>
+            )
+            -&gt;willReturn(<span class="variable">$mockResponse</span>)
+        ;
+        <span class="comment">// ...</span>
+    }</code></pre>
+<p>The <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/blob/master/spec/Peterjmit/BlogBundle/Controller/BlogControllerSpec.php">final code</a> for our specification can be seen in the <a href="https://github.com/peterjmit/getting-started-with-phpspec-and-symfony-2/commits">github repository</a>
+I mentioned at the beginning. It is important to note that we didn&#39;t have to
+define any routing, write any entities (or mapping) to write a valid controller.
+This is part of the beauty of a BDD approach is that it allows you to focus on one
+cog in the machine at a time.</p>
+<h2 id="this-is-not-the-right-way-trade-">This is not the right way&trade;</h2>
+<p>As with many complex topics in education, you need to un-learn what you were
+taught at the beginning to get to the next level. Hopefully you will realise is
+that writing the above specifications and implementations for every controller
+in your application is rather cumbersome and will create a lot of repetition
+in your code base.</p>
+<p>Advice for solving some of the problems introduced by the above examples is
+outside of the scope of this initial post but we will cover it next time. Until
+then here are some good resources that should begin to describe the problems and
+suggest some solutions.</p>
+<ul>
+<li><a href="http://williamdurand.fr/2013/07/30/from-stupid-to-solid-code">From STUPID to SOLID Code!</a></li>
+<li><a href="http://richardmiller.co.uk/2011/04/15/symfony2-controller-as-service/">Symfony2: Controller as Service</a></li>
+<li><a href="http://www.whitewashing.de/2013/06/27/extending_symfony2__controller_utilities.html">Extending Symfony2: Controller Utilities</a></li>
+<li><a href="http://iamproblematic.com/2012/03/12/putting-your-symfony2-controllers-on-a-diet-part-2/">Putting your Symfony2 controllers on a diet, part 2</a></li>
+</ul>
+<h4 id="some-additional-resources-for-phpspec">Some additional resources for PhpSpec</h4>
+<ul>
+<li><a href="http://everzet.com/post/33178339051/sus-collaborators">phpspec2: SUS and collaborators</a></li>
+<li><a href="http://techportal.inviqa.com/2013/07/23/php-test-doubles-patterns-with-prophecy/">An explanation for fakes, stubs, mocks and spies</a></li>
+<li><a href="https://github.com/phpspec/Symfony2Extension">A start to writing a Symfony2 extension for PhpSpec</a></li>
+</ul>
+<hr>
+<p>Please get in touch with me on <a href="https://twitter.com/peterjmit">twitter</a> if you
+have any comments, or <a href="https://github.com/peterjmit/peterjmit.com/blob/master/src/documents/blog/getting-started-with-phpspec-and-symfony-2.html.md">fork this blog post</a> and contribute!</p>
+]]></description>
+            <link>http://peterjmit.com/blog/getting-started-with-phpspec-and-symfony-2.html</link>
+            <guid isPermaLink="true">
+                http://peterjmit.com/blog/getting-started-with-phpspec-and-symfony-2.html            </guid>
+            <dc:creator><![CDATA[Peter Mitchell]]></dc:creator>
+            <pubDate>Mon, 19 Aug 2013 04:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[A better workflow with Chef & Vagrant]]></title>
+            <description><![CDATA[<p>I have been using the Chef and Vagrant combo for a little under a year now and it
+represented a huge improvement in time, efficiency and management of developing,
+running and deploying projects. The workflow I had arrived at was not perfect
+though and had a few warts that needed removing:</p>
+<ol>
+<li><a href="#veewee">Getting hold of (or creating) base boxes for Vagrant</a></li>
+<li><a href="#simplify-chef">The chef repository can grow to be <em>monolithic</em> and hard to understand</a></li>
+<li><a href="#berkshelf">Downloading and managing cookbooks outside of the Opscode repositories is difficult</a></li>
+</ol>
+<h4 id="tools-for-the-new-workflow">Tools for the new workflow</h4>
+<p>You should already have VirtualBox, Chef and Vagrant installed and Configured.
+You will also need to install a ruby version manager (RVM/rbenv) and the
+following gems: <code>veewee</code>, <code>berkshelf</code> and <code>bundler</code> (optional). Hopefully
+the following will explain the what and why being using these tools. <em>note that
+as of writing <code>veewee</code> requires ruby 1.9.2 and <code>berkshelf</code> requires ruby 1.9.3.</em></p>
+<h2 id="veewee">1. Veewee to the rescue</h2>
+
+<p>To get a box ready to be provisioned by Vagrant, there are a few hoops to jump
+through in terms of setting up software (chef, ssh, nfs, a vagrant user etc.).
+This can all be set up manually, but that is not very repeatable and does not
+feel very <em>chef-y</em>.</p>
+<p>In order to find a base box to build on I used to use <a href="http://www.vagrantbox.es/">www.vagrantbox.es</a> as
+a starting point. Finding a correctly configured box is easier said than done,
+assuming Chef is actually installed on the box, I have often found the VirtualBox
+additions to be out of date which can cause problems. Not to mention I am stuck
+if I cannot find a box for the OS I want to install.</p>
+<p>Fortunately Veewee takes all the pain out of this process, with a couple of commands
+you tell Veewee what OS you want to install, and fulfils all the prerequisites
+necessary for Vagrant (or VMWare, KVM, Parallels for that matter). The instructions
+for Veewee are well documented in the <a href="https://github.com/jedi4ever/veewee">repository</a> and in Phil Sturgeon&#39;s
+<a href="http://philsturgeon.co.uk/blog/2013/05/build-your-own-vagrant-boxes-with-veewee">blog post</a> which originally led me to Veewee.</p>
+<h2 id="simplify-chef">2. Simplify the approach to Chef</h2>
+
+<p>Chef is a powerful tool and that power is provided through a few <em>chef-isms</em>.
+Recipes, attributes, LWRPs, cookbooks, roles, nodes, data bags...this is not
+an exhaustive list but this can steepen the learning curve both for a
+beginner, or an infrequent user of Chef revisiting their installation weeks or
+months later.</p>
+<p><strong>The problem</strong></p>
+<p>I set up my chef repository a while back, and I thought I was doing everything
+as I should, I had some community cookbooks, some Github cookbooks (modified
+as part of my chef-repo), and some custom cookbooks all in the same repository.
+I then had roles named things like &quot;database&quot;, &quot;application&quot; or &quot;cache&quot; and
+it all seemed to fit together nicely. These roles could then be composed to build
+a server to host <em>any</em> application, theoretically keeping things separated and
+re-usable.</p>
+<p>The problem came when it was time to change the software stack slightly.
+Updating cookbooks was hard to keep track of, it creates a lot of noise in the
+git log (so many branches!) making debugging or rolling back changes more
+difficult. My ability to understand and use the tool, and how everything fits
+together was impaired - I needed Chef to capture/represent the idea of an
+application and my usage was not doing that.</p>
+<p><strong>The solution</strong></p>
+<p>The solution almost entirely comes from a <a href="http://www.youtube.com/watch?v=hYt0E84kYUI">talk by Jamie Winsor</a> of Riot
+Games. Riot manage a huge persistent multiplayer gaming infrastructure using
+Chef and have open sourced <a href="https://github.com/riotgames">a lot of their work on Github</a>. It boils down to
+taking best practices that you may already be applying in software development
+and applying them (which you may not be doing) to your infrastructure development.</p>
+<h3 id="abandon-as-many-chef-isms-as-you-can">Abandon as many chef-isms as you can</h3>
+<p>You may be just getting started with Chef, and so we want to abandon as much of
+that list of <em>chef-isms</em> I referred to earlier to make things easier for
+ourselves. The good news is that we can...forget about everything else, all we
+need is a cookbook and some recipes.</p>
+<h3 id="cookbooks-for-applications-recipes-for-components">Cookbooks for applications, recipes for components</h3>
+<p>If you have done any <abbr title="Behaviour Driven Development">BDD</abbr> taking
+an &quot;outside in&quot; approach may be familiar. I like taking this approach because
+I find it makes it easier to communicate often abstract/complicated ideas and can
+lead to more simplistic solutions.</p>
+<p>In this context the &quot;outside&quot; is the common unit you are trying to manage with
+Chef, something that everyone in the team understands - a website, application
+or an API for example. In Chef we can model this basic unit of currency as a
+cookbook.</p>
+<p>The next level &quot;in&quot; are the components that make up an application, for a website
+a basic example would be a database server and an application server. These
+components are represented as recipes.</p>
+<p>By communicating this idea/model to your team, usage of Chef/Vagrant for the team
+becomes as simple as.</p>
+<blockquote>
+<p>To get a local environment for &quot;my-awesome-application&quot; up and running
+include some recipe(s) from &quot;my-awesome-application&quot; cookbook in your vagrant
+file.</p>
+</blockquote>
+<p>Furthermore, fixing issues with or adding extra software packages to an
+application/service becomes very clear.</p>
+<blockquote>
+<p>To add the &quot;curl&quot; package to &quot;my-awesome-application&quot; I can checkout
+the &quot;my-awesome-cookbook&quot; and add a step to the &quot;app server&quot; recipe</p>
+</blockquote>
+<p>At the most simple level and if you are just getting started, most recipes will
+serve as wrappers around existing cookbooks setting defaults or creating options
+for software that tailored to your organisation or that are required by the
+frameworks that you are using. As your understanding and requirements increase
+for the tool you can start delving deeper, creating more generic and re-usable
+cookbooks, Jamie&#39;s talk covers some different patterns for developing
+cookbooks/recipes so if you haven&#39;t already, you should <a href="http://www.youtube.com/watch?v=hYt0E84kYUI">watch it</a>.</p>
+<p>If it isn&#39;t already clear, it is important that your application cookbooks stay
+isolated for them to be useful (ideally in their own version controlled
+repository, separated from the Chef repository you may be used to). Cookbooks are
+powerful in that Chef provides a metadata file for defining dependencies and
+their versions, however the default Chef setup means that these dependencies
+become part of your repository and this is not ideal, this brings me to a
+solution for problem 3.</p>
+<h2 id="berkshelf">3. Put your Cookbooks on the Berkshelf</h2>
+
+<p>The way knife manages dependencies is unlike any other tool I use from day to
+day (npm, gem, composer...). I am not a big fan of re-inventing the wheel,
+or doing work a community of people have already contributed to, I have been
+spoilt with the ease of which I can import 3rd party libraries in other languages
+while keeping them isolated from my code base. If you want to pull in cookbooks
+from Github with knife you could use the Github plugin, but that has its own
+issues and hasn&#39;t seen a commit in 2 years (as of writing) and it is not free
+of issues.</p>
+<p>It is this issue that prompted me to look for a better way, and <a href="http://berkshelf.com/">Berkshelf</a>
+seems to be the answer. Berkshelf provides the solution to writing a cookbook
+in isolation, and lets you pull in 3rd party cookbooks from <em>any</em> location
+whether that be Opscode, a git repository or even your local filesystem. When you
+pull in those dependencies, they stay separate from your cookbook just as with
+ruby gems, or npm.</p>
+<h3 id="a-basic-example-of-the-workflow-in-action">A basic example of the workflow in action</h3>
+<p>At the beginning I provided a list of tools for the new workflow, I am going
+to presuppose the following</p>
+<ul>
+<li>You are using Chef server, and have knife configured with your relevant keys</li>
+<li>You have set up/downloaded a box for Vagrant that is ready to provision (this example is going to be specific to Debian Wheezy)</li>
+<li>You have provisioned a Vagrant box via Chef server before (or know how to)</li>
+<li>You have the <code>berkshelf</code> gem installed and ready to use</li>
+</ul>
+<p>At this point we are going to abandon the Chef repository that is described
+in the official Chef documentation, and start from fresh. We are going to provision
+a simple nginx webserver on Debian Wheezy using the latest version instead of
+what is available in the repositories.</p>
+<p>Create the &quot;my-static-blog&quot; cookbook (and get rid of the folders we aren&#39;t
+going to use)</p>
+<pre class="highlighted"><code class="bash">$ cd path/to/save/cookbooks
+$ berks cookbook my-static-blog --license=mit
+$ cd my-static-blog; rm -rf definitions files libraries providers resources templates</code></pre>
+<p>Add the Opscode nginx cookbook as a dependency in <code>metadata.rb</code></p>
+<pre class="highlighted"><code class="ruby"><span class="comment"># metadata.rb</span>
+
+depends <span class="string">'nginx'</span>, <span class="string">'&gt;= 1.7.0'</span></code></pre>
+<p>As of writing the current version of nginx on Debian Wheezy is the 1.2.<em> branch,
+because we like to stay cutting edge I want to get the 1.4.</em> branch and
+fortunately <a href="http://www.dotdeb.org/">dotdeb</a> provides a repository for newer versions on debian. There
+is an opscode community repository for dotdeb, but it doensn&#39;t support Wheezy
+so we have to grab a <a href="https://github.com/peterjmit/chef-dotdeb">custom one</a>. So we add dotdeb to <code>metadata.rb</code> as before</p>
+<pre class="highlighted"><code class="ruby"><span class="comment"># metadata.rb</span>
+
+<span class="comment"># Important, as this cookbook is only compatible with Debian Wheezy because of dotdeb</span>
+supports <span class="string">'debian'</span>, <span class="string">'&gt;= 7.0'</span>
+
+depends <span class="string">'nginx'</span>,  <span class="string">'&gt;= 1.7.0'</span>
+depends <span class="string">'dotdeb'</span>, <span class="string">'&gt;= 0.1.2'</span></code></pre>
+<p>To grab the dotdeb cookbook from Github we need to add a line to <code>Berksfile</code>,
+<code>site :opscode</code> and <code>metadata</code> should already be there, this tells Berkshelf
+to resolve dependencies in <code>metadata.rb</code> from the Opscode repositories by default</p>
+<pre class="highlighted"><code class="haskell"># <span class="type">Berksfile</span>
+
+<span class="title">site</span> :opscode
+
+<span class="title">metadata</span>
+
+<span class="title">cookbook</span> <span class="string">"dotdeb"</span>, github: <span class="string">"peterjmit/chef-dotdeb"</span></code></pre>
+<p>Next you can create a recipe for the web server to tie this all together and
+configure nginx</p>
+<pre class="highlighted"><code class="ruby"><span class="comment"># recipes/web_server.rb</span>
+
+<span class="comment"># You configure some the nginx attributes in the recipe</span>
+<span class="comment"># for example, turning gzip off</span>
+node.set[<span class="symbol">:nginx</span>][<span class="symbol">:gzip</span>] = <span class="string">'off'</span>
+
+<span class="comment"># Include the default recipes to get nginx installed via dotdeb</span>
+include_recipe <span class="string">'dotdeb'</span>
+include_recipe <span class="string">'nginx'</span></code></pre>
+<p>If suitable for your application, you can add your components
+to <code>recipes/default.rb</code> to allow installation of the full application via</p>
+<pre class="highlighted"><code class="ruby"><span class="comment"># recipes/default.rb</span>
+
+include_recipe <span class="string">'my-static-blog::web_server'</span></code></pre>
+<p>Now you are ready to roll, if you run <code>berks install</code> you will install
+the cookbooks you have specified (and their dependencies) to
+<code>~/.berkshelf/cookbooks/</code>. To get your cookbooks on the chef server use
+<code>berks upload</code>. Once you have have done that you are ready to provision
+your Vagrant box, it is as simple as:</p>
+<pre class="highlighted"><code class="ruby"><span class="comment"># Vagrantfile</span>
+
+config.vm.provision <span class="symbol">:chef_client</span> <span class="keyword">do</span> |chef|
+  <span class="comment"># chef server config</span>
+
+  chef.add_recipe <span class="string">'my-static-blog'</span>
+<span class="keyword">end</span></code></pre>
+<p>With any luck you will be able to run <code>vagrant up</code> and voilà, your nginx webserver
+has been provisioned. Most applications are a bit more complex than that, but
+by adding a scripting language recipe to <code>web_server</code> recipe and perhaps
+introducing a <code>database_server</code> recipe you can see how you can build on your
+application cookbooks.</p>
+<h4 id="added-bonus">Added bonus</h4>
+<p>There are a few different ways of doing things in Chef, and things change from
+version to version, fortunately there is a gem called <code>foodcritic</code> that will lint
+your cookbooks for you and report errors, deprecated syntax etc. I highly
+recommend installing it to catch any errors before trying to provision your
+cookbooks.</p>
+<p>Please <a href="https://twitter.com/peterjmit">give me a shout on twitter</a> if you have
+any comments, contributions or corrections for this blog post, all constructive
+feedback is welcome.</p>
+<p><em>Many thanks to Riot Games, Jamie Winsor, and Opscode for open sourcing great
+tools and making high quality learning materials available online</em></p>
+]]></description>
+            <link>http://peterjmit.com/blog/a-better-workflow-with-chef-and-vagrant.html</link>
+            <guid isPermaLink="true">
+                http://peterjmit.com/blog/a-better-workflow-with-chef-and-vagrant.html            </guid>
+            <dc:creator><![CDATA[Peter Mitchell]]></dc:creator>
+            <pubDate>Wed, 26 Jun 2013 04:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Be careful with global variables in Symfony 2 Twig extensions]]></title>
+            <description><![CDATA[<p>I stumbled across a confusing error message while developing some new
+functionality in one of my Symfony 2 based applications.</p>
+<p>I was using some Behat scenarios to guide me through a payment listener that
+emails a customer when their payment has been confirmed. Everything was working
+fine until I tried to introduce a Twig template as the body of an email.</p>
+<blockquote>
+<p>[Symfony\Component\DependencyInjection\Exception\InactiveScopeException]
+You cannot create a service (&quot;request&quot;) of an inactive scope (&quot;request&quot;).</p>
+</blockquote>
+<p>Initially I was stumped, the error message did not point me directly
+to any code I was working with, nor anything I had recently looked at.</p>
+<p>After a lot of head scratching I remembered a Twig extension that I had
+written over a year ago. It helps to conditionally execute javascript
+based on the users current location within the application (inspired by
+Paul Irish&#39;s <a href="http://paulirish.com/2009/markup-based-unobtrusive-comprehensive-dom-ready-execution/">blog post</a>).</p>
+<pre class="highlighted"><code class="php"><span class="comment">// ../Twig/Extension/MyExtension.php</span>
+<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getRouteInfo</span><span class="params">()</span>
+{</span>
+    <span class="variable">$request</span> = <span class="variable">$this</span>-&gt;container-&gt;get(<span class="string">'request'</span>);
+
+    <span class="comment">// ... process the route information</span>
+
+    <span class="keyword">return</span> <span class="variable">$routeInfo</span>;
+}</code></pre>
+<p>In order to make <code>$routeInfo</code> available to all my templates, I had decided
+to make it to global.</p>
+<pre class="highlighted"><code class="php"><span class="comment">// ../Twig/Extension/MyExtension.php</span>
+<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getGlobals</span><span class="params">()</span>
+{</span>
+    <span class="keyword">return</span> [<span class="string">'route'</span> =&gt; <span class="variable">$this</span>-&gt;getRouteInfo()];
+}</code></pre>
+<p>The problem with this is that I have given my Twig environment a hard dependency
+on the <code>Request</code> object. Every time I try and use Twig, it will make that <code>getGlobals</code>
+call, which in turn will be trying to access the <code>Request</code> object.</p>
+<p>This is why, in the CLI context where there is no <code>Request</code> object I was seeing
+the inactive scope exception. While I would not necessarily take the above approach
+again, the fix is quite easy &mdash; the Symfony 2 container provides a method
+for checking if a scope is active or not, which means I can rewrite my
+<code>getRouteInfo</code> method:</p>
+<pre class="highlighted"><code class="php"><span class="comment">// ../Twig/Extension/MyExtension.php</span>
+<span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">getRouteInfo</span><span class="params">()</span>
+{</span>
+    <span class="keyword">if</span> (!<span class="variable">$this</span>-&gt;container-&gt;isScopeActive(<span class="string">'request'</span>)) {
+        <span class="keyword">return</span> <span class="keyword">null</span>;
+    }
+
+    <span class="variable">$request</span> = <span class="variable">$this</span>-&gt;container-&gt;get(<span class="string">'request'</span>);
+
+    <span class="comment">// ... </span>
+
+    <span class="keyword">return</span> <span class="variable">$routeInfo</span>;
+}</code></pre>
+<p>I generally try and shy away from making variables global (in any context) and
+this example reinforces my wariness of using <code>getGlobals</code> in Twig extensions.</p>
+]]></description>
+            <link>http://peterjmit.com/blog/careful-with-twig-global-variables.html</link>
+            <guid isPermaLink="true">
+                http://peterjmit.com/blog/careful-with-twig-global-variables.html            </guid>
+            <dc:creator><![CDATA[Peter Mitchell]]></dc:creator>
+            <pubDate>Mon, 20 May 2013 04:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Why should you upgrade your test suite to PhpSpec & Prophecy]]></title>
+            <description><![CDATA[<p>PhpSpec has recently dropped a 2.0 beta, and it has moved from the mock object
+framework &quot;Mockery&quot; in favour of a new framework called
+<a href="https://github.com/phpspec/prophecy">Prophecy</a>.</p>
+<h4 id="the-tl-dr-guide-to-upgrading-your-test-suite">The tl;dr guide to upgrading your test suite</h4>
+<ol>
+<li>Add <code>&quot;phpspec/phpspec&quot;: &quot;2.0.*@dev&quot;</code> to <code>composer.json</code></li>
+<li>Change all instances of the <code>PHPSpec2</code> namespace to <code>PhpSpec</code></li>
+<li>Rename all your <code>spec/&lt;MyClass&gt;</code> specs to <code>spec/&lt;MyClass&gt;Spec</code></li>
+<li>Replace the <code>ANY_ARGUMENT</code> constant with <code>Prophecy\Argument::any()</code></li>
+</ol>
+<p>Having done the above, your test suite should run but you may see some new failures due to the way Prophecy works</p>
+<ol>
+<li><a href="#undefined-methods">PhpSpec will not let you use methods that are undefined on collaborators</a></li>
+<li><a href="#stub-methods">Stubs in PhpSpec/Prophecy are &quot;all or nothing&quot;</a></li>
+</ol>
+<h2 id="first-step-ndash-update-install-phpspec-with-prophecy">First step &ndash; update/install PhpSpec with Prophecy</h2>
+<p>Documentation is a bit sparse on the ground (but you can <a href="https://github.com/phpspec/phpspec">contribute</a>) so hopefully I can give you a couple of pointers for upgrading your test suite. I have created an <a href="https://github.com/peterjmit/phpspec-prophecy-example" title="PhpSpec &amp; Prophecy example repo">example repository</a> to try and give a quick guide through some of the updates and differences between PhpSpec/Mockery &amp; PhpSpec/Prophecy.</p>
+<p>I am assuming you are using composer you can get a fresh copy of PhpSpec by adding
+or editing the following dependency in <code>composer.json</code></p>
+<pre class="highlighted"><code class="undefined">"phpspec/phpspec": "2.0.*@dev"</code></pre>
+<h2 id="changes-that-will-_break_-your-spec-files">Changes that will <em>break</em> your spec files</h2>
+<p>At first glance not much has changed, hit the following command and it appears
+to be business as usual. But if you are trying to run an <em>old</em> test suite
+then nothing will work.</p>
+<pre class="highlighted"><code class="bash">$ ./vendor/bin/phpspec desc HelloWorld</code></pre>
+<p>Take a look at the <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/f2cfc57dd99b14226a417863785eaf6b660fc651" title="HelloWorld spec description">generated spec</a> and you will notice a couple of
+changes.</p>
+<h3 id="phpspec-has-a-new-namespace">PhpSpec has a new namespace</h3>
+<p>The namespace <code>PHPSpec2</code> has changed to <code>PhpSpec</code>, for example many of your specs will will extend <code>PHPSpec2\ObjectBehavior</code>, so you will want to update your use statement to <code>use PhpSpec\ObjectBehavior;</code>.</p>
+<h3 id="spec-files-classes-now-have-the-suffix-spec-">Spec files/classes now have the suffix &quot;Spec&quot;</h3>
+<p>If you are upgrading existing specs, you will need to rename your spec for <code>HelloWorld.php</code> to <code>HelloWorldSpec.php</code>.</p>
+<h3 id="the-any_argument-s-constant-has-gone">The ANY_ARGUMENT(S) constant has gone</h3>
+<p>In some of your mock expectations, you may have used something like</p>
+<pre class="highlighted"><code class="php"><span class="variable">$mockObject</span>-&gt;methodStub(ANY_ARGUMENT);</code></pre>
+<p>Prophecy handles <a href="https://github.com/phpspec/prophecy#arguments-wildcarding" title="PhpSpec docs - Arguments Wildcarding">arguments wildcarding</a> slightly differently. If you take a
+look at our initial spec again you will see that <code>phpspec desc</code> generates a spec with a use statement for <code>Prophecy\Argument</code>. If you want a direct replacement for <code>ANY_ARGUMENT</code> then you should use:</p>
+<pre class="highlighted"><code class="php"><span class="variable">$mockObject</span>-&gt;methodStub(Prophecy\Argument::any());</code></pre>
+<h2 id="changes-that-can-make-your-specs-_better_">Changes that can make your specs <em>better</em></h2>
+<p>Prophecy integration with PhpSpec contains two key features that give me a lot
+more confidence in my specs and they may cause your existing test suite to fail.</p>
+<h3 id="undefined-methods">PhpSpec complains about un-defined methods in collaborators</h3>
+
+<p>If you take a look at <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/08d5ba9098afd090f56632a45429047e9843e7c8" title="Commit with undefined method on collaborator">this commit</a> I have tried to specify that <code>HelloWorld</code>
+will say hello to a <code>Person</code>. With previous versions of PhpSpec this would have worked
+however Prophecy will complain:</p>
+<p><img src="https://raw.github.com/peterjmit/phpspec-prophecy-example/master/screenshots/undefined-method.png" alt="Undefined method screenshot"></p>
+<p>This is a useful change, for example:</p>
+<ol>
+<li>If you refactor a method name, but don&#39;t update a dependant class - it will be caught by the test suite</li>
+<li>If you type hint for an interface, but use methods not defined within that interface your test will fail</li>
+</ol>
+<h3 id="stub-methods">Stubs in PhpSpec/Prophecy are &quot;all or nothing&quot;</h3>
+
+<p>In Mockery, if you call a method that has not been explictly stubbed it would
+return an instance of <code>Mockery\Undefined</code>. This is problematic, because if you
+use loose comparisons, your test suite may behave unexpectedly. If you consider
+the following block of code that was added in <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/d03dd5aae4dfb4611ff04c4f35664cfd67d82704" title="Example of calling a method that hasn&#39;t been stubbed">this commit</a></p>
+<pre class="highlighted"><code class="php"><span class="comment">// ...</span>
+<span class="keyword">if</span> (<span class="variable">$person</span>-&gt;isMale()) {
+    <span class="variable">$salutation</span> = <span class="string">'Mr. '</span>;
+} <span class="keyword">else</span> <span class="keyword">if</span> (<span class="variable">$person</span>-&gt;isFemale()) {
+    <span class="variable">$salutation</span> = <span class="string">'Ms. '</span>;
+} <span class="keyword">else</span> {
+    <span class="comment">// gender in-specific salutation</span>
+    <span class="variable">$salutation</span> = <span class="string">''</span>;
+}
+<span class="comment">// ...</span></code></pre>
+<p>In the spec, we stub <code>$person-&gt;isFemale()</code> and <code>$person-&gt;getName()</code></p>
+<pre class="highlighted"><code class="php"><span class="comment">// test name shortened for brevity</span>
+<span class="function"><span class="keyword">function</span> <span class="title">it_should_address_</span>/*..*/<span class="params">(<span class="variable">$person</span>)</span>
+{</span>
+    <span class="variable">$person</span>-&gt;getName()-&gt;willReturn(<span class="string">'Jane'</span>);
+    <span class="variable">$person</span>-&gt;isFemale()-&gt;willReturn(<span class="keyword">true</span>);
+
+    <span class="variable">$this</span>-&gt;addressSomeoneWithSalutation(<span class="variable">$person</span>)
+        -&gt;shouldReturn(<span class="string">'Dear Ms. Jane'</span>);
+}</code></pre>
+<p>If you haven&#39;t realised yet with Mockery this spec will always fail, but not in
+an expected way (or a way that would occur in an actual runtime). The call
+to <code>$person-&gt;isMale()</code> will always evaluate to true (because the object <code>Mockery\Undefined</code>
+is returned and coerced to <code>true</code>), incorrectly giving us the salutation for a male.</p>
+<p>Prophecy on the other hand will not put up with this, failing the test with a
+useful message.</p>
+<p>[edit] This is because stubs in Prophecy are &quot;loose demand doubles&quot;, if you do not stub
+any methods on them, they will always return <code>null</code>. Once you stub a method they
+become &quot;strict demand doubles&quot; requiring you to stub all methods that your
+<abbr title="Subject Under Specification">SUS</abbr> is interacting with. <sup><a href="#ref-1">1</a></sup></p>
+<p><img src="https://raw.github.com/peterjmit/phpspec-prophecy-example/master/screenshots/method-not-stubbed.png" alt="Method not stubbed"></p>
+<p>We are therefore forced to stub <code>$person-&gt;isMale()</code> in order for our tests to pass
+ as shown in <a href="https://github.com/peterjmit/phpspec-prophecy-example/commit/1038519d8985dd095d92cb87d35e605caa728a13" title="Commit resolving un-stubbed method issue">this commit</a>.</p>
+<p>If you have a comment on this post, or if I have missed any of the standout
+new features then let me know <a href="https://twitter.com/peterjmit">on twitter</a> or
+<a href="mailto:pete@peterjmit.com?subject=Re: Why should you upgrade your test suite to PhpSpec & Prophecy">email me</a></p>
+<p><small id="ref-1">[1] thanks to <a href="https://twitter.com/everzet">@everzet</a> &amp; <a href="https://twitter.com/_md">@_md</a> for providing explanation on twitter</small></p>
+]]></description>
+            <link>http://peterjmit.com/blog/why-should-you-upgrade-your-test-suite-to-phpspec-and-prophecy.html</link>
+            <guid isPermaLink="true">
+                http://peterjmit.com/blog/why-should-you-upgrade-your-test-suite-to-phpspec-and-prophecy.html            </guid>
+            <dc:creator><![CDATA[Peter Mitchell]]></dc:creator>
+            <pubDate>Mon, 06 May 2013 04:00:00 GMT</pubDate>
+        </item>
+    </channel>
+</rss>
