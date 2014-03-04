@@ -1,0 +1,3 @@
+<a class="hire" href="mailto:<%= @site.email %>?subject=I would like to work with you on...">
+  I am available for hire
+</a>

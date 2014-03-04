@@ -18,9 +18,7 @@ isPage: true
       <%- @partial('social.html') %>
     </div>
 
-    <a class="hire" href="mailto:<%= @site.email %>?subject=I would like to work with you on...">
-      I am available for hire
-    </a>
+    <%- @partial('hire_me.html') %>
   </div>
 </section>
 
