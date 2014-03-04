@@ -17,8 +17,6 @@ isPage: true
 
       <%- @partial('social.html') %>
     </div>
-
-    <%- @partial('hire_me.html') %>
   </div>
 </section>
 
